@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="16dp"
+android:background="@color/default_app_color">
+
+<TextView
+    android:id="@+id/logo_textview"
+    android:text="인증 코드 입력하기"
+    android:textSize="24sp"
+    android:textColor="@color/black"
+    android:textStyle="bold"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"/>
+
+<com.google.android.material.textfield.TextInputLayout
+    android:id="@+id/authCodeInputLayout"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="32dp"
+    app:layout_constraintTop_toBottomOf="@id/logo_textview"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/authCodeInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="인증 코드"
+        android:importantForAccessibility="yes"
+        android:inputType="number" />
+
+</com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 인증 시간 표시 -->
+    <TextView
+        android:id="@+id/textview_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/authCodeInputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="남은 시간: 00:00"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentEnd="true"/>
+
+    <!-- 인증 코드 다시 받기 버튼 -->
+    <Button
+        android:id="@+id/btn_resend_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/authCodeInputLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="다시 보내기"
+        android:textSize="12sp"
+        android:paddingVertical="6dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/default_app_color_bl2"
+        />
+
+<Button
+    android:id="@+id/next_button"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:text="인증하기"
+    android:backgroundTint="@color/default_app_color_d1"
+    app:layout_constraintTop_toBottomOf="@id/btn_resend_code"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

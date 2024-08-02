@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/dialog_background">
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="상태 변경하기"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="온라인"
+        android:textAlignment="viewStart"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@color/default_app_color_d1"
+        android:onClick="onCloseButtonClick"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="자리비움"
+        android:textAlignment="viewStart"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@color/default_app_color_bl1"
+        android:onClick="onCloseButtonClick"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="방해 금지"
+        android:textAlignment="viewStart"
+        android:textSize="16sp"
+        android:backgroundTint="@color/default_app_color_bl1"
+        android:textStyle="bold"
+        android:onClick="onCloseButtonClick"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="오프라인"
+        android:textAlignment="viewStart"
+        android:textSize="16sp"
+        android:backgroundTint="@color/default_app_color_bl1"
+        android:textStyle="bold"
+        android:onClick="onCloseButtonClick"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="사용자 지정 상태"
+        android:textAlignment="viewStart"
+        android:textSize="16sp"
+        android:backgroundTint="@color/default_app_color_bl1"
+        android:textStyle="bold"
+        android:onClick="onCloseButtonClick"/>
+</LinearLayout>

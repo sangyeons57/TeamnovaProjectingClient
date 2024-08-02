@@ -1,0 +1,58 @@
+plugins {
+    alias(libs.plugins.androidApplication)
+}
+
+android {
+    namespace 'com.example.teamnovapersonalprojectprojecting'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.teamnovapersonalprojectprojecting"
+        minSdk 29
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dataBinding {
+        enabled = true
+    }
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
+        exclude 'META-INF/*.kotlin_module'
+        exclude 'META-INF/*.pro'
+        // 필요에 따라 추가적인 제외 규칙을 설정할 수 있습니다.
+    }}
+
+dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.11.0") // Always use the latest version
+    implementation("io.netty:netty-all:4.1.92.Final") // Use the latest version
+    implementation ("com.loopj.android:android-async-http:1.4.9")
+
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.navigation.runtime
+    implementation libs.navigation.ui
+    implementation libs.navigation.fragment
+    implementation libs.filament.android
+    implementation libs.javax.mail
+    implementation libs.activation
+    implementation libs.security.crypto
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}

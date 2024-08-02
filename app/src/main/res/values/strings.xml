@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">TeamnovaPersonalProjectProjecting</string>
+    <string name="title_home">Home</string>
+    <string name="title_calendar">Calendar</string>
+    <string name="title_profile">Profile</string>
+
+    <string name="email_hint">이메일</string>
+    <string name="password_hint">패스워드</string>
+
+    <string name="login_button_text">로그인</string>
+
+    <string name="test_username">사용자1</string>
+    <string name="test_chat_message">사용자 테스트 쳇팅</string>
+</resources>
