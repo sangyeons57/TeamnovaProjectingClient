@@ -27,7 +27,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ServerConnectManager {
-    public static final String IP = "3-34-42-15";
+    public static final String IP = "43-202-32-108";
     public static final String REGION = ".ap-northeast-2";
     public static final String BASE_URL = "http://ec2-" + IP + REGION + ".compute.amazonaws.com/";
 
