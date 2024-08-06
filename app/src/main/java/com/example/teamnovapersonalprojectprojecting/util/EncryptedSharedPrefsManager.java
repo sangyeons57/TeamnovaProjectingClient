@@ -1,4 +1,4 @@
-package com.example.teamnovapersonalprojectprojecting.utill;
+package com.example.teamnovapersonalprojectprojecting.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.teamnovapersonalprojectprojecting.JoinActivity;
 import com.example.teamnovapersonalprojectprojecting.R;
-import com.example.teamnovapersonalprojectprojecting.utill.ServerConnectManager;
+import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 

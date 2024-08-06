@@ -73,6 +73,16 @@
             android:textStyle="bold"
             android:textColor="@color/black"
             android:backgroundTint="@color/default_app_color_bl3"/>
+
+        <Button
+            android:id="@+id/friendsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="내 친구"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/default_app_color_bl3"/>
     </LinearLayout>
 
     <EditText

@@ -14,10 +14,12 @@ import androidx.fragment.app.Fragment;
 
 import com.example.teamnovapersonalprojectprojecting.PersonalSettingActivity;
 import com.example.teamnovapersonalprojectprojecting.R;
-import com.example.teamnovapersonalprojectprojecting.utill.DataManager;
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
+import com.example.teamnovapersonalprojectprojecting.FriendsActivity;
 
 public class ProfileFragment extends Fragment {
     private Button statusButton;
+    private Button friendsButton;
     private ImageButton personalSettingButton;
 
     private TextView profileName;
@@ -26,6 +28,7 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         statusButton = view.findViewById(R.id.set_status_button);
         personalSettingButton = view.findViewById(R.id.personal_setting_button);
+        friendsButton = view.findViewById(R.id.friendsButton);
         profileName = view.findViewById(R.id.profile_name);
 
 
@@ -42,6 +45,13 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getActivity(), PersonalSettingActivity.class));
+            }
+        });
+
+        friendsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getActivity(), FriendsActivity.class));
             }
         });
 

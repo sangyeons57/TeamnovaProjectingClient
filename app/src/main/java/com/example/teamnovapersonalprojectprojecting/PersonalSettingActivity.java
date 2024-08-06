@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.teamnovapersonalprojectprojecting.ui.profile.setting.ChangeNameDialogFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.profile.setting.ChangePasswordActivity;
-import com.example.teamnovapersonalprojectprojecting.utill.DataManager;
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 
 public class PersonalSettingActivity extends AppCompatActivity {
 

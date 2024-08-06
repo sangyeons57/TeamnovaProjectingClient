@@ -18,8 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.teamnovapersonalprojectprojecting.R;
-import com.example.teamnovapersonalprojectprojecting.utill.DataManager;
-import com.example.teamnovapersonalprojectprojecting.utill.ServerConnectManager;
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
+import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 

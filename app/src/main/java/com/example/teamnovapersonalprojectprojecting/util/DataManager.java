@@ -1,4 +1,6 @@
-package com.example.teamnovapersonalprojectprojecting.utill;
+package com.example.teamnovapersonalprojectprojecting.util;
+
+import static com.example.teamnovapersonalprojectprojecting.util.WebsocketManager.NOT_SETUP;
 
 import android.content.Context;
 import android.content.Intent;
@@ -39,5 +41,6 @@ public class DataManager {
     }
 
     public String username;
-    public String userId;
+    public String userId = NOT_SETUP;
+    public String channelId = NOT_SETUP;
 }

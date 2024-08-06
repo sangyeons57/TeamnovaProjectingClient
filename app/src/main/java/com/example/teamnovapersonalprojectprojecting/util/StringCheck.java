@@ -1,4 +1,4 @@
-package com.example.teamnovapersonalprojectprojecting.utill;
+package com.example.teamnovapersonalprojectprojecting.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

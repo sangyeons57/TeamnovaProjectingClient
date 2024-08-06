@@ -14,8 +14,8 @@ import com.example.teamnovapersonalprojectprojecting.ui.join.AuthCodeFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.join.EmailFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.join.SetNameFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.join.SetPasswordFragment;
-import com.example.teamnovapersonalprojectprojecting.utill.EncryptedSharedPrefsManager;
-import com.example.teamnovapersonalprojectprojecting.utill.ServerConnectManager;
+import com.example.teamnovapersonalprojectprojecting.util.EncryptedSharedPrefsManager;
+import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;

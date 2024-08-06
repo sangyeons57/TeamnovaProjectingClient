@@ -1,4 +1,4 @@
-package com.example.teamnovapersonalprojectprojecting.utill;
+package com.example.teamnovapersonalprojectprojecting.util;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -102,7 +102,7 @@ public class ServerConnectManager {
         String url = urlBuilder.build().toString();
 
         formBody = builder.build();
-        request = buildRequest(url,formBody, sessionCookie);
+        request = buildRequest(url, sessionCookie);
 
         Log("Get Execute: " + url);
         return client.newCall(request).execute();
@@ -125,7 +125,7 @@ public class ServerConnectManager {
             urlBuilder.addQueryParameter(entry.getKey(), entry.getValue());
         }
         String url = urlBuilder.build().toString();
-        request = buildRequest(url,formBody, sessionCookie);
+        request = buildRequest(url, sessionCookie);
 
         client.newCall(request).enqueue(callback);
         Log("Get Enqueue: " + url);
@@ -143,8 +143,19 @@ public class ServerConnectManager {
         Log("Post Enqueue: " + path);
     }
 
-    private Request buildRequest(String url, FormBody formBody) {
-        return buildRequest(url, formBody, null);
+    private Request buildRequest(String url, String sessionCookie) {
+        if(sessionCookie == null){
+            return new Request.Builder()
+                    .url(url)
+                    .get()
+                    .build();
+        } else {
+            return new Request.Builder()
+                    .url(url)
+                    .get()
+                    .addHeader("Cookie", sessionCookie)
+                    .build();
+        }
     }
     private Request buildRequest(String url, FormBody formBody , String sessionCookie) {
         if(sessionCookie == null){
@@ -215,7 +226,8 @@ public class ServerConnectManager {
         TEST("Script/test/"),
 
         CERTIFICATION("Script/Certification/"),
-        CHANGE_PROFILE("Script/ChangeProfile/");
+        CHANGE_PROFILE("Script/ChangeProfile/"),
+        FRIENDS("Script/Friends/");
 
         private final String directory;
         private Path(String directory) {

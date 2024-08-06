@@ -18,4 +18,5 @@
     <color name="default_app_color_bl1_highlight">#97C6CA</color>
     <color name="default_app_color_bl2">#616D81</color>
     <color name="default_app_color_bl3">#A1AAB8</color>
+    <color name="default_app_color_bl4">#B2A8EC</color>
 </resources>

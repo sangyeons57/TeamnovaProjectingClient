@@ -13,10 +13,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.teamnovapersonalprojectprojecting.utill.StringCheck;
-import com.example.teamnovapersonalprojectprojecting.utill.DataManager;
-import com.example.teamnovapersonalprojectprojecting.utill.EncryptedSharedPrefsManager;
-import com.example.teamnovapersonalprojectprojecting.utill.ServerConnectManager;
+import com.example.teamnovapersonalprojectprojecting.util.StringCheck;
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
+import com.example.teamnovapersonalprojectprojecting.util.EncryptedSharedPrefsManager;
+import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 

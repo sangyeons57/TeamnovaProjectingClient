@@ -16,8 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.example.teamnovapersonalprojectprojecting.utill.StringCheck;
-import com.example.teamnovapersonalprojectprojecting.utill.ServerConnectManager;
+import com.example.teamnovapersonalprojectprojecting.util.StringCheck;
+import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
