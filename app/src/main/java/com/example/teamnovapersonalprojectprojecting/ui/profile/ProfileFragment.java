@@ -32,6 +32,7 @@ public class ProfileFragment extends Fragment {
         profileName = view.findViewById(R.id.profile_name);
 
 
+        profileName.setText(DataManager.Instance().username);
 
         statusButton.setOnClickListener(new View.OnClickListener() {
             @Override

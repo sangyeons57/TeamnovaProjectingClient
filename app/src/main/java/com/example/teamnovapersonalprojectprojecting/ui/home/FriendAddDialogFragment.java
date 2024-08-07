@@ -17,7 +17,10 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
+import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
+import com.example.teamnovapersonalprojectprojecting.util.WebSocketEcho;
+import com.example.teamnovapersonalprojectprojecting.util.WebsocketManager;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONException;
@@ -42,31 +45,37 @@ public class FriendAddDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 String waitingUserName = searchNameInput.getText().toString().trim();
-                ServerConnectManager serverConnectManager = new ServerConnectManager(ServerConnectManager.Path.FRIENDS.getPath("addWaiting.php"))
-                        .add("waitingUserName", waitingUserName)
-                        .add("userId", DataManager.Instance().userId);
-                serverConnectManager.postEnqueue(new ServerConnectManager.EasyCallback() {
-                    @Override
-                    protected void onGetJson(JSONObject jsonObject) throws IOException, JSONException {
-                        super.onGetJson(jsonObject);
-                        final String status = jsonObject.getString("status");
-                        if (status.equals("success")){
-                            mainHandler.post(()->{
-                                infoTextView.setText( "[" + waitingUserName + "] 에게 친구요청을 보냈습니다.");
-                                infoTextView.setVisibility(View.VISIBLE);
-                                infoTextView.setTextColor(Color.BLACK);
-                            });
+                WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()
+                        .add(JsonUtil.Key.WAITING_USER_NAME, waitingUserName)
+                        .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId))
+                        .Send(WebsocketManager.Type.ADD_WAITING);
+                if(waitingUserName.equals(DataManager.Instance().username)){
+                    infoTextView.setText("자기자신 에게는 친구요청을 보낼수 없습니다.");
+                    infoTextView.setVisibility(View.VISIBLE);
+                    infoTextView.setTextColor(Color.RED);
+                    return;
+                }
 
-                            final String message = jsonObject.getString("data");
-                            ServerConnectManager.Log(status);
-                            ServerConnectManager.Log(message);
-                        } else {
-                            mainHandler.post(()-> {
-                                infoTextView.setText("[" + waitingUserName + "] 에게 친구요청에 실패 했습니다.");
-                                infoTextView.setVisibility(View.VISIBLE);
-                                infoTextView.setTextColor(Color.RED);
-                            });
-                        }
+                WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_WAITING, (websocketManager)->{
+                    JsonUtil jsonUtil = websocketManager.getJsonUtil();
+                    WebsocketManager.Log(jsonUtil.getJsonString());
+                    final String status = jsonUtil.getString(JsonUtil.Key.STATUS, "error");
+                    if (status.equals("success")){
+                        getActivity().runOnUiThread(()-> {
+                            infoTextView.setText("[" + waitingUserName + "] 에게 친구요청을 보냈습니다.");
+                            infoTextView.setVisibility(View.VISIBLE);
+                            infoTextView.setTextColor(Color.BLACK);
+                        });
+
+                        final String message = jsonUtil.getString(JsonUtil.Key.DATA,"data 읽기 실패");
+                        ServerConnectManager.Log(status);
+                        ServerConnectManager.Log(message);
+                    } else {
+                        getActivity().runOnUiThread(()->{
+                            infoTextView.setText("[" + waitingUserName + "] 에게 친구요청에 실패 했습니다.");
+                            infoTextView.setVisibility(View.VISIBLE);
+                            infoTextView.setTextColor(Color.RED);
+                        });
                     }
                 });
             }

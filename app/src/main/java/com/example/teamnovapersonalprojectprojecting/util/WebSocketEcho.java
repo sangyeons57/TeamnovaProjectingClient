@@ -1,6 +1,6 @@
 package com.example.teamnovapersonalprojectprojecting.util;
 
-import android.service.autofill.UserData;
+import android.util.Log;
 
 import okhttp3.*;
 import okio.ByteString;
@@ -9,21 +9,27 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.example.teamnovapersonalprojectprojecting.LoginActivity;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil.Key;
 import com.example.teamnovapersonalprojectprojecting.util.WebsocketManager.Type;
 
 public class WebSocketEcho extends WebSocketListener {
     public static final String IP = "43-202-32-108";
     public static final String REGION = ".ap-northeast-2";
-    public static final String BASE_URL = "ws://ec2-" + IP + REGION + ".compute.amazonaws.com:8080/";
+    public static final String BASE_URL = "ws://ec2-" + IP + REGION + ".compute.amazonaws.com:8080";
     public static final String NOT_SETUP = "NOT_SETUP";
 
     private boolean isCommand = false;
     private String command;
+
+    private Map<Type, List<OnCallListener>> eventListenerMap;
 
     protected WebSocket webSocket;
 
@@ -32,21 +38,31 @@ public class WebSocketEcho extends WebSocketListener {
     private static WebSocketEcho instance;
     private WebSocketEcho(){
         OkHttpClient client = new OkHttpClient.Builder()
-                .readTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
                 .build();
 
         Request request = new Request.Builder()
-                .url(BASE_URL)
+                .url(BASE_URL + "?userId=" + DataManager.Instance().userId)
                 .build();
 
         webSocket = client.newWebSocket(request, this);
+        eventListenerMap = new HashMap<>();
     }
 
     public static WebSocketEcho Instance(){
+        if(DataManager.Instance().userId.equals(WebsocketManager.NOT_SETUP)){
+            WebsocketManager.Loge("userId set up is first");
+            return null;
+        }
+
         if(instance == null){
             instance = new WebSocketEcho();
         }
         return instance;
+    }
+
+    public WebSocket getWebsocket(){
+        return webSocket;
     }
 
 
@@ -82,17 +98,13 @@ public class WebSocketEcho extends WebSocketListener {
                     command = "exit";
                 } else {
 
-                    ;
                     if(!DataManager.Instance().userId.equals(WebsocketManager.NOT_SETUP) &&
                     !DataManager.Instance().channelId.equals(WebsocketManager.NOT_SETUP)){
-                        try {
                             WebsocketManager.Generate(webSocket).setJsonUtil(new JsonUtil()
-                                    .add(JsonUtil.Key.MESSAGE,input))
-                                    .autoAddKey(JsonUtil.Key.USER_ID, JsonUtil.Key.CHANNEL_ID)
+                                    .add(Key.MESSAGE,input)
+                                    .add(Key.USER_ID, DataManager.Instance().userId)
+                                    .add(Key.CHANNEL_ID, DataManager.Instance().channelId))
                                     .Send(Type.MESSAGE);
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
                     } else {
                         System.out.println("set user or join channel is first");
                     }
@@ -114,42 +126,10 @@ public class WebSocketEcho extends WebSocketListener {
 
     @Override
     public void onMessage(WebSocket webSocket, String text){
-        try {
-            WebsocketManager message = WebsocketManager.Generate(webSocket).setJsonUtil(new JsonUtil(text));;
-            switch (message.getType()){
-                case MESSAGE:
-                    if(message.getJsonUtil().isSuccess() && message.getJsonUtil().getBoolean(JsonUtil.Key.IS_SELF, false)) {
-                        System.out.print(message.getJsonUtil().getString(JsonUtil.Key.USER_ID, WebsocketManager.NOT_SETUP) + ": ");
-                        System.out.println(message.getJsonUtil().getString(JsonUtil.Key.MESSAGE, NOT_SETUP));
-                    } else {
-                        System.out.println(message.getJsonUtil().getJsonString());
-                    }
-                    break;
-
-                case SET_USER:
-                    if(message.getJsonUtil().isSuccess()) {
-                        System.out.println("compelete set user: " + message.getJsonUtil().getString(Key.USER_ID, WebsocketManager.NOT_SETUP));
-                    } else {
-                        System.out.println("fail to set user");
-                        DataManager.Instance().userId = WebsocketManager.NOT_SETUP;
-                    }
-                    break;
-
-                case CREATE_DM_CHANNEL:
-                    if(message.getJsonUtil().isSuccess()) {
-                        System.out.println("compelete create DM");
-                    } else {
-                        System.out.println("fail to create DM table");
-                    }
-                    break;
-                case JOIN_CHANNEL:
-                    if(message.getJsonUtil().isSuccess()) {
-                        System.out.println("join channel " + message.getJsonUtil().getString(Key.CHANNEL_ID, NOT_SETUP));
-                        DataManager.Instance().channelId = message.getJsonUtil().getString(Key.CHANNEL_ID, NOT_SETUP);
-                    } else {
-                        System.out.println("fail to join channel " + DataManager.Instance().channelId);
-                    }
-                }
+            try {
+                WebsocketManager message = WebsocketManager.Generate(webSocket).setJsonUtil(new JsonUtil(text));;
+                WebsocketManager.Log(message.getType().toString());
+                callEvent(message.getType(), message);
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -169,9 +149,11 @@ public class WebSocketEcho extends WebSocketListener {
     @Override
     public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @Nullable Response response) {
         t.printStackTrace();
-        System.out.println(response.toString());
         try {
-            System.out.println(response.body().string());
+            if(response != null){
+                WebsocketManager.Loge(response.toString());
+                WebsocketManager.Loge(response.body().string());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -182,8 +164,9 @@ public class WebSocketEcho extends WebSocketListener {
             case "createDM":
                 WebsocketManager.Generate(webSocket).setJsonUtil(new JsonUtil()
                         .add(Key.USER_ID1, DataManager.Instance().userId)
-                        .add(Key.USER_ID2, input))
-                        .autoAddKey(Key.USER_ID, Key.CHANNEL_ID)
+                        .add(Key.USER_ID2, input)
+                        .add(Key.USER_ID, DataManager.Instance().userId)
+                        .add(Key.CHANNEL_ID, DataManager.Instance().channelId))
                         .Send(Type.CREATE_DM_CHANNEL);
                 break;
             case "join":
@@ -193,8 +176,9 @@ public class WebSocketEcho extends WebSocketListener {
                 }
 
                 WebsocketManager.Generate(webSocket).setJsonUtil(new JsonUtil()
-                        .add(Key.CHANNEL_ID,input))
-                        .autoAddKey(Key.USER_ID)
+                        .add(Key.CHANNEL_ID,input)
+                        .add(Key.USER_ID, DataManager.Instance().userId)
+                        .add(Key.CHANNEL_ID, DataManager.Instance().channelId))
                         .Send(Type.JOIN_CHANNEL);
                 break;
             case "exit":
@@ -207,5 +191,54 @@ public class WebSocketEcho extends WebSocketListener {
                 DataManager.Instance().channelId = WebsocketManager.NOT_SETUP;
                 break;
         }
+    }
+
+    public boolean addEventListener(Type type, OnCallListener listener) {
+        if(eventListenerMap == null) {
+            eventListenerMap = new HashMap<>();
+        }
+        if(type.equals(Type.NONE)|| (listener == null)){
+            return false;
+        }
+        List<OnCallListener> listenerList;
+        if(eventListenerMap.containsKey(type)){
+            listenerList = eventListenerMap.get(type);
+        } else {
+            listenerList = new ArrayList<>();
+        }
+
+        listenerList.add(listener);
+
+        eventListenerMap.put(type, listenerList);
+        return true;
+    }
+    public boolean removeEventListener(Type type, OnCallListener listener) {
+        if(eventListenerMap == null) {
+            return false;
+        }
+        if(type.equals(Type.NONE)|| (listener == null)){
+            return false;
+        }
+
+        if(eventListenerMap.containsKey(type)) {
+            eventListenerMap.get(type).remove(listener);
+        }
+        return true;
+    }
+
+    public void callEvent(Type type, WebsocketManager websocketManager) {
+        if(!eventListenerMap.containsKey(type)) {
+            return ;
+        }
+        WebsocketManager.Log("call event: " + type.toString());
+        WebsocketManager.Log("call event: " +websocketManager.getJsonUtil().getJsonString());
+
+        for (OnCallListener listener: eventListenerMap.get(type))  {
+            listener.onEvent(websocketManager);
+        }
+    }
+
+    public interface OnCallListener {
+        public void onEvent(WebsocketManager input);
     }
 }

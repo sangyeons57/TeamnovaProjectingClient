@@ -87,6 +87,9 @@ public class ServerConnectManager {
         Log.e("Server", message);
     }
 
+    public ServerConnectManager add(JsonUtil.Key key, String value) {
+        return add(key.toString(), value);
+    }
     public ServerConnectManager add(String key, String value){
         params.put(key, value);
         builder.add(key, value);
@@ -227,6 +230,7 @@ public class ServerConnectManager {
 
         CERTIFICATION("Script/Certification/"),
         CHANGE_PROFILE("Script/ChangeProfile/"),
+        USERS("Script/Users/"),
         FRIENDS("Script/Friends/");
 
         private final String directory;

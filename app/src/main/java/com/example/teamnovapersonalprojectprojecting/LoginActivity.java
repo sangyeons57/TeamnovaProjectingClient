@@ -13,10 +13,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 import com.example.teamnovapersonalprojectprojecting.util.StringCheck;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.EncryptedSharedPrefsManager;
 import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
+import com.example.teamnovapersonalprojectprojecting.util.WebSocketEcho;
+import com.example.teamnovapersonalprojectprojecting.util.WebsocketManager;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -164,6 +167,13 @@ public class LoginActivity extends AppCompatActivity {
                     DataManager.Instance().username = username;
 
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
+
+                    WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()
+                            .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId))
+                            .Send(WebsocketManager.Type.SET_USER);
+                    WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.SET_USER, (websocketManager)->{
+                        WebsocketManager.Log(websocketManager.getJsonUtil().getJsonString());
+                    });
 
                     EncryptedSharedPrefsManager.init(LoginActivity.this, EncryptedSharedPrefsManager.LOGIN);
                     EncryptedSharedPrefsManager.putString("email", email);

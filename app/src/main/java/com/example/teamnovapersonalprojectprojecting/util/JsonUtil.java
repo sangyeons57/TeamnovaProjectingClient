@@ -1,8 +1,12 @@
 package com.example.teamnovapersonalprojectprojecting.util;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.Serializable;
 
 public class JsonUtil {
     public enum Key {
@@ -12,10 +16,13 @@ public class JsonUtil {
         USER_ID("userId"),
         USER_ID1("userId1"),
         USER_ID2("userId2"),
+        USERNAME("username"),
+        DATA("data"),
         IS_SELF("isSelf"),
         CREATE_TIME("createTime"),
         UPDATE_TIME("updateTime"),
         CHANNEL_ID("channelId"),
+        WAITING_USER_NAME("waitingUserName"),
         ;
 
         private String keyName;
@@ -44,28 +51,22 @@ public class JsonUtil {
         this.jsonObject = jsonObject;
     }
 
-    public JsonUtil add(Key key, double value) throws JSONException {
-        jsonObject.put(key.keyName, value);
+    public <T extends Serializable> JsonUtil add(Key key, T value) {
+        try {
+            jsonObject.put(key.keyName, value);
+        } catch (JSONException e){
+            e.printStackTrace();
+            Log.e("JsonUtil", "Error occur in add key: " + key.keyName + " value: " + value);
+        }
         return this;
     }
-
-    public JsonUtil add(Key key, boolean value) throws JSONException {
-        jsonObject.put(key.keyName, value);
-        return this;
-    }
-
-    public JsonUtil add(Key key, long value) throws JSONException {
-        jsonObject.put(key.keyName, value);
-        return this;
-    }
-
-    public JsonUtil add(Key key, int value) throws JSONException {
-        jsonObject.put(key.keyName, value);
-        return this;
-    }
-
-    public JsonUtil add(Key key, Object value) throws JSONException {
-        jsonObject.put(key.keyName, value);
+    public JsonUtil add(Key key, Object value) {
+        try {
+            jsonObject.put(key.keyName, value);
+        } catch (JSONException e){
+            e.printStackTrace();
+            Log.e("JsonUtil", "Error occur in add key: " + key.keyName + " value: " + value);
+        }
         return this;
     }
 
