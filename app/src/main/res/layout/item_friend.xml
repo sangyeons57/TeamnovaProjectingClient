@@ -32,7 +32,7 @@
         android:textSize="18sp"/>
 
     <Button
-        android:id="@+id/acceptFriendButton"
+        android:id="@+id/DMButton"
         android:layout_width="60dp"
         android:layout_height="48dp"
         android:text="DM"

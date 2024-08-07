@@ -80,6 +80,8 @@ public class WebsocketManager  {
         EXIT_CHANNEL("ExitChannel"),
         ADD_WAITING("AddWaiting"),
         NOT_JSON("NotJson"),
+        ADD_FRIEND_ON_WAITING("AddFriendOnWaiting"),
+        REMOVE_WAITING_DATA("RemoveWaitingData"),
         ;
 
         public static String type = "type";

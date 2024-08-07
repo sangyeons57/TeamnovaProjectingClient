@@ -13,6 +13,7 @@ public class JsonUtil {
         MESSAGE("message"),
         STATUS("status"),
         TYPE("type"),
+        ID("id"),
         USER_ID("userId"),
         USER_ID1("userId1"),
         USER_ID2("userId2"),

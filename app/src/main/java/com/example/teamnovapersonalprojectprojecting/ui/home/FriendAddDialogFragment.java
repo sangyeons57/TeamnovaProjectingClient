@@ -45,16 +45,18 @@ public class FriendAddDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 String waitingUserName = searchNameInput.getText().toString().trim();
-                WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()
-                        .add(JsonUtil.Key.WAITING_USER_NAME, waitingUserName)
-                        .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId))
-                        .Send(WebsocketManager.Type.ADD_WAITING);
                 if(waitingUserName.equals(DataManager.Instance().username)){
                     infoTextView.setText("자기자신 에게는 친구요청을 보낼수 없습니다.");
                     infoTextView.setVisibility(View.VISIBLE);
                     infoTextView.setTextColor(Color.RED);
                     return;
                 }
+
+                WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()
+                        .add(JsonUtil.Key.WAITING_USER_NAME, waitingUserName)
+                        .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
+                        .add(JsonUtil.Key.USERNAME, DataManager.Instance().username))
+                        .Send(WebsocketManager.Type.ADD_WAITING);
 
                 WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_WAITING, (websocketManager)->{
                     JsonUtil jsonUtil = websocketManager.getJsonUtil();

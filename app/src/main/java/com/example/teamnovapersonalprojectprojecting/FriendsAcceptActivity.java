@@ -1,6 +1,7 @@
 package com.example.teamnovapersonalprojectprojecting;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatatypeMismatchException;
 import android.os.Bundle;
 import android.service.autofill.UserData;
 import android.util.Log;
@@ -70,7 +71,7 @@ public class FriendsAcceptActivity extends AppCompatActivity {
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject waiting = new JSONObject(jsonArray.getString(i));
-                        watingList.add(new DataModel(waiting.getString("username")));
+                        watingList.add(new FriendsAcceptActivity.DataModel(waiting.getString(JsonUtil.Key.ID.toString()), waiting.getString(JsonUtil.Key.USERNAME.toString())));
                     }
                     runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
                 } else if (jsonObject.getString(JsonUtil.Key.STATUS.toString()).equals("success_0")){
@@ -80,6 +81,14 @@ public class FriendsAcceptActivity extends AppCompatActivity {
             }
         });
 
+        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.REMOVE_WAITING_DATA, (websocketManager)->{
+            for (DataModel dataModel: watingList) {
+                if(dataModel.getUserId().equals(websocketManager.getJsonUtil().getString(JsonUtil.Key.USER_ID, ""))){
+                    watingList.remove(dataModel);
+                    runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
+                }
+            }
+        });
 
         /*
         TODO: 이부분을 볼때 업데이트 되는 데이터는 요청이 발생하지 않아도
@@ -88,21 +97,9 @@ public class FriendsAcceptActivity extends AppCompatActivity {
          따라서 이벤트 할당 기능을 만들어야한다.
          */
         onCallListener = (websocketManager)->{
-            ServerConnectManager getUserData = new ServerConnectManager(ServerConnectManager.Path.USERS.getPath("getUserData.php"))
-                    .add(JsonUtil.Key.USER_ID, websocketManager.getJsonUtil().getString(JsonUtil.Key.USER_ID, ""));
-            getUserData.postEnqueue(new ServerConnectManager.EasyCallback(){
-                @Override
-                protected void onGetJson(JSONObject jsonObject) throws IOException, JSONException {
-                    super.onGetJson(jsonObject);
-                    if(jsonObject.getString(JsonUtil.Key.STATUS.toString()).equals("success")){
-                        JSONObject data = jsonObject.getJSONObject(JsonUtil.Key.DATA.toString());
-                        watingList.add(new DataModel(data.getString(JsonUtil.Key.USERNAME.toString())));
-                        runOnUiThread(()->{ recyclerView.getAdapter().notifyDataSetChanged(); });
-                    } else {
-                        ServerConnectManager.Loge(jsonObject.getString(JsonUtil.Key.MESSAGE.toString()));
-                    }
-                }
-            });
+            JsonUtil data = websocketManager.getJsonUtil();
+            watingList.add(new DataModel(data.getString(JsonUtil.Key.USER_ID, ""),data.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
+            runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
         };
         WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_WAITING, onCallListener);
     }
@@ -123,13 +120,12 @@ public class FriendsAcceptActivity extends AppCompatActivity {
         @Override
         public DataViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accept_friend, parent, false);
-            return new DataViewHolder(view);
+            return new DataViewHolder(view, this);
         }
 
         @Override
         public void onBindViewHolder(@NonNull DataViewHolder holder, int position) {
-            DataModel dataModel = dataModelList.get(position);
-            holder.nameTextView.setText(dataModel.getName());
+            holder.setData(dataModelList.get(position));
         }
 
         @Override
@@ -139,23 +135,48 @@ public class FriendsAcceptActivity extends AppCompatActivity {
     }
 
     public static class DataViewHolder extends RecyclerView.ViewHolder {
+        private DataAdapter dataAdapter;
+        DataModel dataModel;
         TextView nameTextView;
         ImageView friendProfileImage;
+        String userId;
 
-        public DataViewHolder(@NonNull View itemView) {
+        public DataViewHolder(@NonNull View itemView, DataAdapter dataAdapter) {
             super(itemView);
+            this.dataAdapter = dataAdapter;
             nameTextView = itemView.findViewById(R.id.friendName);
             friendProfileImage = itemView.findViewById(R.id.friendProfileImage);
+            itemView.findViewById(R.id.acceptFriendButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    WebsocketManager.Log(DataManager.Instance().userId + " " + userId);
+                    WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()
+                            .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
+                            .add(JsonUtil.Key.USER_ID1, userId))
+                            .Send(WebsocketManager.Type.ADD_FRIEND_ON_WAITING);
+                    dataAdapter.dataModelList.remove(dataModel);
+                    dataAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+
+        public void setData(DataModel dataModel){
+            this.dataModel = dataModel;
+            nameTextView.setText(dataModel.getName());
+            userId = dataModel.getUserId();
         }
     }
 
     public class DataModel {
+        private String userId;
         private String name;
-        public DataModel(String name) {
+        public DataModel(String userId,String name) {
+            this.userId = userId;
             this.name = name;
         }
 
         // Getters
         public String getName() { return name; }
+        public String getUserId() { return userId; }
     }
 }
