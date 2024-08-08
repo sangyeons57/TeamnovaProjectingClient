@@ -83,12 +83,14 @@ public class FriendAddDialogFragment extends DialogFragment {
                             infoTextView.setVisibility(View.VISIBLE);
                             infoTextView.setTextColor(Color.RED);
                         });
-                    } else if (status.equals("errror")) {
+                    } else if (status.equals("error")) {
                         mainHandler.post(() -> {
                             infoTextView.setText("[" + waitingUserName + "] 에게 친구요청에 실패 했습니다.");
                             infoTextView.setVisibility(View.VISIBLE);
                             infoTextView.setTextColor(Color.RED);
                         });
+                    } else {
+                        ServerConnectManager.Log("FriendAddDialogFragment couldn't handle it: " + jsonUtil.getJsonString());
                     }
                 });
             }

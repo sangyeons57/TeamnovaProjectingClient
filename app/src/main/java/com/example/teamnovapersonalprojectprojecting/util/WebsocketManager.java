@@ -17,6 +17,7 @@ public class WebsocketManager  {
 
     private WebSocket websocket;
     private JsonUtil jsonUtil;
+
     private WebsocketManager(WebSocket websocket){
         this.websocket = websocket;
         this.jsonUtil = new JsonUtil();
@@ -76,7 +77,8 @@ public class WebsocketManager  {
         MESSAGE("Message"),
         SET_USER("SetUser"),
         CREATE_DM_CHANNEL("CreateDMChannel"),
-        JOIN_CHANNEL("JoinChannel"),
+        JOIN_DM_CHANNEL("JoinDMChannel"),
+        SEND_MESSAGE("SendMessage"),
         EXIT_CHANNEL("ExitChannel"),
         ADD_WAITING("AddWaiting"),
         NOT_JSON("NotJson"),

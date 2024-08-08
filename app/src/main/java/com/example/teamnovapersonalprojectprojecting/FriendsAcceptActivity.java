@@ -101,6 +101,7 @@ public class FriendsAcceptActivity extends AppCompatActivity {
 
         WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_FRIEND_ON_WAITING, (websocketManager)->{
             JsonUtil data = websocketManager.getJsonUtil();
+            WebsocketManager.Log(data.getJsonString());
             String userId = data.getString(JsonUtil.Key.USER_ID, "");
             waitingList = waitingList.stream()
                     .filter(dataModel -> !dataModel.getUserId().equals(userId))

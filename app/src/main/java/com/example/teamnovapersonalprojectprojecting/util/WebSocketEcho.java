@@ -1,5 +1,6 @@
 package com.example.teamnovapersonalprojectprojecting.util;
 
+import android.content.Context;
 import android.util.Log;
 
 import okhttp3.*;
@@ -17,6 +18,7 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import com.example.teamnovapersonalprojectprojecting.LoginActivity;
+import com.example.teamnovapersonalprojectprojecting.WebsocketEventListener.JoinDMChannel;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil.Key;
 import com.example.teamnovapersonalprojectprojecting.util.WebsocketManager.Type;
 
@@ -25,6 +27,8 @@ public class WebSocketEcho extends WebSocketListener {
     public static final String REGION = ".ap-northeast-2";
     public static final String BASE_URL = "ws://ec2-" + IP + REGION + ".compute.amazonaws.com:8080";
     public static final String NOT_SETUP = "NOT_SETUP";
+
+    public Context currentContext;
 
     private boolean isCommand = false;
     private String command;
@@ -47,6 +51,12 @@ public class WebSocketEcho extends WebSocketListener {
 
         webSocket = client.newWebSocket(request, this);
         eventListenerMap = new HashMap<>();
+
+        this.Register();
+    }
+
+    private void Register(){
+        addEventListener(Type.JOIN_DM_CHANNEL, new JoinDMChannel());
     }
 
     public static WebSocketEcho Instance(){
@@ -179,7 +189,7 @@ public class WebSocketEcho extends WebSocketListener {
                         .add(Key.CHANNEL_ID,input)
                         .add(Key.USER_ID, DataManager.Instance().userId)
                         .add(Key.CHANNEL_ID, DataManager.Instance().channelId))
-                        .Send(Type.JOIN_CHANNEL);
+                        .Send(Type.JOIN_DM_CHANNEL);
                 break;
             case "exit":
                 if(DataManager.Instance().channelId.equals(WebsocketManager.NOT_SETUP)) {

@@ -54,6 +54,8 @@ public class FriendsActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new FriendsActivity.DataAdapter(friendsList));
 
+        WebSocketEcho.Instance().currentContext = this;
+
         acceptFriendButton.setOnClickListener(v -> {
             startActivity(new Intent(FriendsActivity.this, FriendsAcceptActivity.class));
         });
@@ -141,6 +143,10 @@ public class FriendsActivity extends AppCompatActivity {
             itemView.findViewById(R.id.DMButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()).setJsonUtil(new JsonUtil()
+                            .add(JsonUtil.Key.USER_ID1, DataManager.Instance().userId)
+                            .add(JsonUtil.Key.USER_ID2, userId))
+                            .Send(WebsocketManager.Type.JOIN_DM_CHANNEL);
                 }
             });
         }

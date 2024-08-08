@@ -6,6 +6,7 @@
     android:background="@drawable/round_background"
     android:backgroundTint="@color/default_app_color_d1"
     android:orientation="horizontal"
+    android:layout_margin="6dp"
     android:padding="6dp">
 
     <ImageView

@@ -14,15 +14,18 @@ public class JsonUtil {
         STATUS("status"),
         TYPE("type"),
         ID("id"),
+        CHAT_ID ("chatId"),
         USER_ID("userId"),
         USER_ID1("userId1"),
         USER_ID2("userId2"),
         USERNAME("username"),
+        DATETIME("datetime"),
         DATA("data"),
         IS_SELF("isSelf"),
         CREATE_TIME("createTime"),
         UPDATE_TIME("updateTime"),
         CHANNEL_ID("channelId"),
+        FRIEND_NAME("friendName"),
         WAITING_USER_NAME("waitingUserName"),
         ;
 
