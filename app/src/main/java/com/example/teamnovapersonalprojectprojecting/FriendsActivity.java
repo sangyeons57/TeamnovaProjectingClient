@@ -32,6 +32,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FriendsActivity extends AppCompatActivity {
     private Button acceptFriendButton;
@@ -93,6 +94,12 @@ public class FriendsActivity extends AppCompatActivity {
                 }
             }
         });
+
+        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_FRIEND_ON_WAITING, (websocketManager)->{
+            JsonUtil data = websocketManager.getJsonUtil();
+            friendsList.add(new DataModel(data.getString(JsonUtil.Key.USER_ID, ""),data.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
+            runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
+        });
     }
 
     public static class DataAdapter extends RecyclerView.Adapter<FriendsActivity.DataViewHolder> {
@@ -145,7 +152,7 @@ public class FriendsActivity extends AppCompatActivity {
         }
     }
 
-    public class DataModel {
+    public static class DataModel {
         private String userId;
         private String name;
         public DataModel(String userId,String name) {

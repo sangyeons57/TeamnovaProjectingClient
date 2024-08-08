@@ -3,6 +3,8 @@ package com.example.teamnovapersonalprojectprojecting.ui.home;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.service.autofill.UserData;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -32,6 +34,7 @@ public class FriendAddDialogFragment extends DialogFragment {
     TextInputEditText searchNameInput;
     Button searchNameButton;
     TextView infoTextView;
+    Handler mainHandler;
 
     @Nullable
     @Override
@@ -40,6 +43,8 @@ public class FriendAddDialogFragment extends DialogFragment {
         this.searchNameInput = view.findViewById(R.id.searchNameInput);
         this.searchNameButton = view.findViewById(R.id.searchNameButton);
         this.infoTextView = view.findViewById(R.id.infoTextView);
+
+        mainHandler = new Handler(Looper.getMainLooper());
 
         this.searchNameButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +68,7 @@ public class FriendAddDialogFragment extends DialogFragment {
                     WebsocketManager.Log(jsonUtil.getJsonString());
                     final String status = jsonUtil.getString(JsonUtil.Key.STATUS, "error");
                     if (status.equals("success")){
-                        getActivity().runOnUiThread(()-> {
+                        mainHandler.post(() -> {
                             infoTextView.setText("[" + waitingUserName + "] 에게 친구요청을 보냈습니다.");
                             infoTextView.setVisibility(View.VISIBLE);
                             infoTextView.setTextColor(Color.BLACK);
@@ -72,8 +77,14 @@ public class FriendAddDialogFragment extends DialogFragment {
                         final String message = jsonUtil.getString(JsonUtil.Key.DATA,"data 읽기 실패");
                         ServerConnectManager.Log(status);
                         ServerConnectManager.Log(message);
-                    } else {
-                        getActivity().runOnUiThread(()->{
+                    } else if (status.equals("success_0")) {
+                        mainHandler.post(() -> {
+                            infoTextView.setText("[" + waitingUserName + "] 는 이미 친구 요청을 보냈습니다.");
+                            infoTextView.setVisibility(View.VISIBLE);
+                            infoTextView.setTextColor(Color.RED);
+                        });
+                    } else if (status.equals("errror")) {
+                        mainHandler.post(() -> {
                             infoTextView.setText("[" + waitingUserName + "] 에게 친구요청에 실패 했습니다.");
                             infoTextView.setVisibility(View.VISIBLE);
                             infoTextView.setTextColor(Color.RED);

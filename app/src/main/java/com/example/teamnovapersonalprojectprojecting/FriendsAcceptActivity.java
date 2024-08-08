@@ -1,9 +1,6 @@
 package com.example.teamnovapersonalprojectprojecting;
 
-import android.content.Intent;
-import android.database.sqlite.SQLiteDatatypeMismatchException;
 import android.os.Bundle;
-import android.service.autofill.UserData;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,13 +28,13 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FriendsAcceptActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
-    private List<DataModel> watingList;
+    private List<DataModel> waitingList;
     private ImageButton backButton;
 
-    private WebSocketEcho.OnCallListener onCallListener;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +43,8 @@ public class FriendsAcceptActivity extends AppCompatActivity {
         this.backButton = findViewById(R.id.backButton);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        watingList = new ArrayList<>();
-        recyclerView.setAdapter(new DataAdapter(watingList));
+        waitingList = new ArrayList<>();
+        recyclerView.setAdapter(new DataAdapter(waitingList));
 
         this.backButton.setOnClickListener(v -> {
             finish();
@@ -71,7 +68,7 @@ public class FriendsAcceptActivity extends AppCompatActivity {
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject waiting = new JSONObject(jsonArray.getString(i));
-                        watingList.add(new FriendsAcceptActivity.DataModel(waiting.getString(JsonUtil.Key.ID.toString()), waiting.getString(JsonUtil.Key.USERNAME.toString())));
+                        waitingList.add(new FriendsAcceptActivity.DataModel(waiting.getString(JsonUtil.Key.ID.toString()), waiting.getString(JsonUtil.Key.USERNAME.toString())));
                     }
                     runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
                 } else if (jsonObject.getString(JsonUtil.Key.STATUS.toString()).equals("success_0")){
@@ -82,9 +79,9 @@ public class FriendsAcceptActivity extends AppCompatActivity {
         });
 
         WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.REMOVE_WAITING_DATA, (websocketManager)->{
-            for (DataModel dataModel: watingList) {
+            for (DataModel dataModel: waitingList) {
                 if(dataModel.getUserId().equals(websocketManager.getJsonUtil().getString(JsonUtil.Key.USER_ID, ""))){
-                    watingList.remove(dataModel);
+                    waitingList.remove(dataModel);
                     runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
                 }
             }
@@ -96,18 +93,25 @@ public class FriendsAcceptActivity extends AppCompatActivity {
          따라서 WebsocketEcho부분에 이벤트를 받아서 데이터를 업데이트 되도록 해야한다.
          따라서 이벤트 할당 기능을 만들어야한다.
          */
-        onCallListener = (websocketManager)->{
+        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_WAITING, (websocketManager)->{
             JsonUtil data = websocketManager.getJsonUtil();
-            watingList.add(new DataModel(data.getString(JsonUtil.Key.USER_ID, ""),data.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
+            waitingList.add(new DataModel(data.getString(JsonUtil.Key.USER_ID, ""),data.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
             runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
-        };
-        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_WAITING, onCallListener);
+        });
+
+        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_FRIEND_ON_WAITING, (websocketManager)->{
+            JsonUtil data = websocketManager.getJsonUtil();
+            String userId = data.getString(JsonUtil.Key.USER_ID, "");
+            waitingList = waitingList.stream()
+                    .filter(dataModel -> !dataModel.getUserId().equals(userId))
+                    .collect(Collectors.toList());
+            runOnUiThread(()-> recyclerView.getAdapter().notifyDataSetChanged());
+        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        WebSocketEcho.Instance().removeEventListener(WebsocketManager.Type.ADD_WAITING, onCallListener);
     }
 
     public static class DataAdapter extends RecyclerView.Adapter<DataViewHolder> {
@@ -167,7 +171,7 @@ public class FriendsAcceptActivity extends AppCompatActivity {
         }
     }
 
-    public class DataModel {
+    public static class DataModel {
         private String userId;
         private String name;
         public DataModel(String userId,String name) {
