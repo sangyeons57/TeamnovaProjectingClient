@@ -35,6 +35,8 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton sendButton;
     private EditText messageEditText;
     private TextView channelNameTextView;
+
+    private Intent intent;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,32 +55,7 @@ public class ChatActivity extends AppCompatActivity {
         adapter = new ChatAdapter(chatList); // Create your adapter with chat data
         chatRecyclerView.setAdapter(adapter);
 
-
-        Intent intent = getIntent();
-        String jsonData = intent.getStringExtra("JsonData");
-        WebsocketManager.Log(jsonData);
-        try {
-            JsonUtil jsonUtil = new JsonUtil(jsonData);
-            JSONArray jsonArray = jsonUtil.getJsonArray(JsonUtil.Key.DATA, new JSONArray());
-            for (int i = jsonArray.length() - 1; i >= 0; i--){
-                JsonUtil data = new JsonUtil(jsonArray.getJSONObject(i));
-                ChatAdapter.ChatItem chatItem = new ChatAdapter.ChatItem(
-                        R.drawable.ic_account_black_24dp,
-                        data.getString(JsonUtil.Key.USERNAME, "문제 발생"),
-                        data.getString(JsonUtil.Key.MESSAGE, "문제 발생"),
-                        data.getString(JsonUtil.Key.DATETIME, "0000.00.00 ER00:00")
-                );
-                chatItem.chatId = data.getInt(JsonUtil.Key.ID, -1);
-                chatList.add(chatItem);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-
-        if(chatList.size() > 0){
-            adapter.notifyItemInserted(chatList.size() - 1);
-            chatRecyclerView.smoothScrollToPosition(chatList.size() - 1);
-        }
+        this.intent = getIntent();
 
         channelNameTextView.setText(intent.getStringExtra("channelName"));
 
@@ -143,9 +120,44 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        chatList.clear();
+
+        String jsonData = intent.getStringExtra("JsonData");
+        WebsocketManager.Log(jsonData);
+        try {
+            JsonUtil jsonUtil = new JsonUtil(jsonData);
+            JSONArray jsonArray = jsonUtil.getJsonArray(JsonUtil.Key.DATA, new JSONArray());
+            for (int i = 0; i < jsonArray.length(); i++){
+                JsonUtil data = new JsonUtil(jsonArray.getJSONObject(i));
+                ChatAdapter.ChatItem chatItem = new ChatAdapter.ChatItem(
+                        R.drawable.ic_account_black_24dp,
+                        data.getString(JsonUtil.Key.USERNAME, "문제 발생"),
+                        data.getString(JsonUtil.Key.MESSAGE, "문제 발생"),
+                        data.getString(JsonUtil.Key.DATETIME, "0000.00.00 ER00:00")
+                );
+                chatItem.chatId = data.getInt(JsonUtil.Key.ID, -1);
+                chatList.add(chatItem);
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        if(chatList.size() > 0){
+            adapter.notifyItemInserted(chatList.size() - 1);
+            chatRecyclerView.smoothScrollToPosition(chatList.size() - 1);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         DataManager.Instance().channelId = WebsocketManager.NOT_SETUP;
+
+        WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket())
+                .Send(WebsocketManager.Type.EXIT_CHANNEL);
     }
     public int addChat(ChatAdapter.ChatItem chatItem) {
         int chatId = adapter.addChat(chatItem);
