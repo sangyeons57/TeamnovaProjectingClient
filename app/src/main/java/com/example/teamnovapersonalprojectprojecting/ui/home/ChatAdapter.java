@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.teamnovapersonalprojectprojecting.R;
-import com.example.teamnovapersonalprojectprojecting.util.WebsocketManager;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +47,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             chatItem.chatId = chatList.get(chatList.size() - 1).chatId + 1;
         }
         chatList.add(chatItem);
-        WebsocketManager.Log("addchat: "+chatItem.chatId);
+        SocketConnection.LOG("addchat", chatItem.chatId);
 
         return chatItem.chatId;
     }
@@ -55,7 +55,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     public ChatItem getChat(int chatId){
         for(int i = chatList.size() - 1; i >= 0; i--){
             if(chatList.get(i).chatId == chatId){
-                WebsocketManager.Log( chatId + " " + chatList.get(i).chatId);
+                SocketConnection.LOG( chatId + " " + chatList.get(i).chatId);
                 return chatList.get(i);
             }
         }

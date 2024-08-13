@@ -18,11 +18,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
-import com.example.teamnovapersonalprojectprojecting.util.WebSocketEcho;
-import com.example.teamnovapersonalprojectprojecting.util.WebsocketManager;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONException;
@@ -57,15 +57,14 @@ public class FriendAddDialogFragment extends DialogFragment {
                     return;
                 }
 
-                WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()
+                SocketConnection.sendMessage(new JsonUtil()
+                        .add(JsonUtil.Key.TYPE, SocketEventListener.eType.ADD_WAITING)
                         .add(JsonUtil.Key.WAITING_USER_NAME, waitingUserName)
                         .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
-                        .add(JsonUtil.Key.USERNAME, DataManager.Instance().username))
-                        .Send(WebsocketManager.Type.ADD_WAITING);
+                        .add(JsonUtil.Key.USERNAME, DataManager.Instance().username));
 
-                WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_WAITING, (websocketManager)->{
-                    JsonUtil jsonUtil = websocketManager.getJsonUtil();
-                    WebsocketManager.Log(jsonUtil.getJsonString());
+                SocketEventListener.addEvent(SocketEventListener.eType.ADD_WAITING, (jsonUtil)->{
+                    SocketConnection.LOG(jsonUtil.toString());
                     final String status = jsonUtil.getString(JsonUtil.Key.STATUS, "error");
                     if (status.equals("success")){
                         mainHandler.post(() -> {
@@ -90,7 +89,7 @@ public class FriendAddDialogFragment extends DialogFragment {
                             infoTextView.setTextColor(Color.RED);
                         });
                     } else {
-                        ServerConnectManager.Log("FriendAddDialogFragment couldn't handle it: " + jsonUtil.getJsonString());
+                        ServerConnectManager.Log("FriendAddDialogFragment couldn't handle it: " + jsonUtil.toString());
                     }
                 });
             }

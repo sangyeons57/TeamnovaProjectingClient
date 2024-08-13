@@ -2,6 +2,8 @@ package com.example.teamnovapersonalprojectprojecting.util;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,6 +12,7 @@ import java.io.Serializable;
 
 public class JsonUtil {
     public enum Key {
+        NONE("NONE"),
         MESSAGE("message"),
         STATUS("status"),
         TYPE("type"),
@@ -37,7 +40,15 @@ public class JsonUtil {
 
         @Override
         public String toString() {
-            return keyName;
+            return this.keyName;
+        }
+
+        public static Key toKey(String str) {
+            for (Key key : Key.values()) {
+                if (key.keyName.equalsIgnoreCase(str))
+                    return key;
+            }
+            return Key.NONE;
         }
     }
 
@@ -53,6 +64,12 @@ public class JsonUtil {
 
     public JsonUtil(JSONObject jsonObject) {
         this.jsonObject = jsonObject;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return jsonObject.toString();
     }
 
     public <T extends Serializable> JsonUtil add(Key key, T value) {
@@ -89,10 +106,6 @@ public class JsonUtil {
         } catch (JSONException e) {
             return false;
         }
-    }
-
-    public String getJsonString() {
-        return jsonObject.toString();
     }
 
     public String getString(Key key, String defaultValue) {
@@ -148,75 +161,6 @@ public class JsonUtil {
             return jsonObject.getLong(key.keyName);
         } catch (JSONException e) {
             return defaultValue;
-        }
-    }
-
-    /*
-    public boolean tryGetString(Key key, Ref<String> stringRef) {
-        boolean answer = true;
-        try {
-            stringRef = new Ref(getString(key));
-        } catch (JSONException e) { answer = false; }
-        return answer;
-    }
-    public boolean tryGetJsonObject(Key key, Ref<JSONObject> stringRef) {
-        boolean answer = true;
-        try {
-            stringRef = new Ref(getJsonObject(key));
-        } catch (JSONException e) { answer = false; }
-        return answer;
-    }
-    public boolean tryGetJsonArray(Key key, Ref<JSONArray> stringRef) {
-        boolean answer = true;
-        try {
-            stringRef = new Ref(getJsonArray(key));
-        } catch (JSONException e) { answer = false; }
-        return answer;
-    }
-    public boolean tryGetBoolean(Key key, Ref<Boolean> stringRef) {
-        boolean answer = true;
-        try {
-            stringRef = new Ref(getBoolean(key));
-        } catch (JSONException e) { answer = false; }
-        return answer;
-    }
-    public boolean tryGetDouble(Key key, Ref<Double> stringRef) {
-        boolean answer = true;
-        try {
-            stringRef = new Ref(getDouble(key));
-        } catch (JSONException e) { answer = false; }
-        return answer;
-    }
-    public boolean tryGetInt(Key key, Ref<Integer> stringRef) {
-        boolean answer = true;
-        try {
-            stringRef = new Ref(getInt(key));
-        } catch (JSONException e) { answer = false; }
-        return answer;
-    }
-    public boolean tryGetLong(Key key, Ref<Long> stringRef) {
-        boolean answer = true;
-        try {
-            stringRef = new Ref(getLong(key));
-        } catch (JSONException e) { answer = false; }
-        return answer;
-    }
-    */
-
-    public static boolean TryReadJson(String jsonString, Ref<JsonUtil> ref) {
-        boolean answer = true;
-        try {
-            ref = new Ref(new JsonUtil(jsonString));
-        } catch (JSONException e) {
-            answer = false;
-        }
-        return answer;
-    }
-
-    public static class Ref<T>{
-        public T value;
-        public Ref(T value){
-            this.value = value;
         }
     }
 }

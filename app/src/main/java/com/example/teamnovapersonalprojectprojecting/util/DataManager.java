@@ -1,6 +1,5 @@
 package com.example.teamnovapersonalprojectprojecting.util;
 
-import static com.example.teamnovapersonalprojectprojecting.util.WebsocketManager.NOT_SETUP;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +19,8 @@ public class DataManager {
         }
         return instance;
     }
+
+    public static final String NOT_SETUP = "NOT_SETUP";
 
     public void Logout(Context context){
         ServerConnectManager serverConnectManager = new ServerConnectManager(ServerConnectManager.Path.CERTIFICATION.getPath("Logout.php"));
@@ -43,4 +44,6 @@ public class DataManager {
     public String username;
     public String userId = NOT_SETUP;
     public String channelId = NOT_SETUP;
+
+    public Context currentContext;
 }

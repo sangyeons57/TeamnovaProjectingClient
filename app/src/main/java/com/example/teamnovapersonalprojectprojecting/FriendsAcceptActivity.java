@@ -15,11 +15,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
-import com.example.teamnovapersonalprojectprojecting.util.WebSocketEcho;
-import com.example.teamnovapersonalprojectprojecting.util.WebsocketManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,9 +78,9 @@ public class FriendsAcceptActivity extends AppCompatActivity {
             }
         });
 
-        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.REMOVE_WAITING_DATA, (websocketManager)->{
+        SocketEventListener.addEvent(SocketEventListener.eType.REMOVE_WAITING_DATA, (jsonUtil)->{
             for (DataModel dataModel: waitingList) {
-                if(dataModel.getUserId().equals(websocketManager.getJsonUtil().getString(JsonUtil.Key.USER_ID, ""))){
+                if(dataModel.getUserId().equals(jsonUtil.getString(JsonUtil.Key.USER_ID, ""))){
                     waitingList.remove(dataModel);
                     runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
                 }
@@ -93,16 +93,14 @@ public class FriendsAcceptActivity extends AppCompatActivity {
          따라서 WebsocketEcho부분에 이벤트를 받아서 데이터를 업데이트 되도록 해야한다.
          따라서 이벤트 할당 기능을 만들어야한다.
          */
-        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_WAITING, (websocketManager)->{
-            JsonUtil data = websocketManager.getJsonUtil();
-            waitingList.add(new DataModel(data.getString(JsonUtil.Key.USER_ID, ""),data.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
+        SocketEventListener.addEvent(SocketEventListener.eType.ADD_WAITING, (jsonUtil)->{
+            waitingList.add(new DataModel(jsonUtil.getString(JsonUtil.Key.USER_ID, ""),jsonUtil.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
             runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
         });
 
-        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_FRIEND_ON_WAITING, (websocketManager)->{
-            JsonUtil data = websocketManager.getJsonUtil();
-            WebsocketManager.Log(data.getJsonString());
-            String userId = data.getString(JsonUtil.Key.USER_ID, "");
+        SocketEventListener.addEvent(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, (jsonUtil)->{
+            SocketConnection.LOG(jsonUtil.toString());
+            String userId = jsonUtil.getString(JsonUtil.Key.USER_ID, "");
             waitingList = waitingList.stream()
                     .filter(dataModel -> !dataModel.getUserId().equals(userId))
                     .collect(Collectors.toList());
@@ -154,11 +152,12 @@ public class FriendsAcceptActivity extends AppCompatActivity {
             itemView.findViewById(R.id.acceptFriendButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    WebsocketManager.Log(DataManager.Instance().userId + " " + userId);
-                    WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()
+
+                    SocketConnection.LOG(DataManager.Instance().userId + " " + userId);
+                    SocketConnection.sendMessage(new JsonUtil()
+                            .add(JsonUtil.Key.TYPE, SocketEventListener.eType.ADD_FRIEND_ON_WAITING)
                             .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
-                            .add(JsonUtil.Key.USER_ID1, userId))
-                            .Send(WebsocketManager.Type.ADD_FRIEND_ON_WAITING);
+                            .add(JsonUtil.Key.USER_ID1, userId));
                     dataAdapter.dataModelList.remove(dataModel);
                     dataAdapter.notifyDataSetChanged();
                 }

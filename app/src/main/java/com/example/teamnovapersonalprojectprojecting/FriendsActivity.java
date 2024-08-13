@@ -17,13 +17,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.ui.home.FriendAddDialogFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.profile.ChangeStatusDialogFragment;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
-import com.example.teamnovapersonalprojectprojecting.util.WebSocketEcho;
-import com.example.teamnovapersonalprojectprojecting.util.WebsocketManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,7 +54,7 @@ public class FriendsActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new FriendsActivity.DataAdapter(friendsList));
 
-        WebSocketEcho.Instance().currentContext = this;
+        DataManager.Instance().currentContext = this;
 
         acceptFriendButton.setOnClickListener(v -> {
             startActivity(new Intent(FriendsActivity.this, FriendsAcceptActivity.class));
@@ -97,9 +97,8 @@ public class FriendsActivity extends AppCompatActivity {
             }
         });
 
-        WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.ADD_FRIEND_ON_WAITING, (websocketManager)->{
-            JsonUtil data = websocketManager.getJsonUtil();
-            friendsList.add(new DataModel(data.getString(JsonUtil.Key.USER_ID, ""),data.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
+        SocketEventListener.addEvent(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, (jsonUtil)->{
+            friendsList.add(new DataModel(jsonUtil.getString(JsonUtil.Key.USER_ID, ""), jsonUtil.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
             runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
         });
     }
@@ -143,10 +142,10 @@ public class FriendsActivity extends AppCompatActivity {
             itemView.findViewById(R.id.DMButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()).setJsonUtil(new JsonUtil()
+                    SocketConnection.sendMessage(new JsonUtil()
+                            .add(JsonUtil.Key.TYPE, SocketEventListener.eType.JOIN_DM_CHANNEL)
                             .add(JsonUtil.Key.USER_ID1, DataManager.Instance().userId)
-                            .add(JsonUtil.Key.USER_ID2, userId))
-                            .Send(WebsocketManager.Type.JOIN_DM_CHANNEL);
+                            .add(JsonUtil.Key.USER_ID2, userId));
                 }
             });
         }

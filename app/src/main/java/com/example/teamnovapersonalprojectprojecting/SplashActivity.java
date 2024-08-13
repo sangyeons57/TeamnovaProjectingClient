@@ -8,6 +8,8 @@ import android.os.Handler;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
+
 public class SplashActivity extends AppCompatActivity {
     private static final int SPLASH_DISPLAY_LENGTH = 2000;
     private static final String PREFS_NAME = "MyAppPrefs";
@@ -22,6 +24,7 @@ public class SplashActivity extends AppCompatActivity {
         //NettyTest용 코드 현제는 알수없는 접근 거부 문제로 작동이 안됨
         //ServerTest.NettyTest();
         //ServerTest.AsyncHttpClientTest();
+        SocketConnection.Instance();
 
         if(true){
             setContentView(R.layout.activity_splash);
