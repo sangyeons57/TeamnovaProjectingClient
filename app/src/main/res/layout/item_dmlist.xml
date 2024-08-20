@@ -19,7 +19,7 @@
     <TextView
         android:id="@+id/dm_profile_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:text="DM 사용자"
         android:textColor="@color/white"
         android:textSize="32sp"/>

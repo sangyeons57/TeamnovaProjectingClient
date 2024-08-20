@@ -34,15 +34,31 @@
 
     <Button
         android:id="@+id/acceptFriendButton"
-        android:layout_width="wrap_content"
+        android:layout_width="70dp"
         android:layout_height="48dp"
-        android:text="수락하기"
+        android:padding="1dp"
+        android:text="수락"
         android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/denyFriendButton"
         android:layout_marginRight="0dp"
+        android:layout_marginEnd="8dp"/>
+
+    <Button
+        android:id="@+id/denyFriendButton"
+        android:layout_width="70dp"
+        android:layout_height="48dp"
+        android:text="거절"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/warning"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="16dp"/>
+        android:layout_marginRight="0dp"
+        android:layout_marginEnd="8dp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -35,10 +35,16 @@ public class FriendsAcceptActivity extends AppCompatActivity {
     private List<DataModel> waitingList;
     private ImageButton backButton;
 
+    SocketEventListener.EventListener removeWaitingEventListener;
+    SocketEventListener.EventListener addWaitingEventListener;
+    SocketEventListener.EventListener addFriendOnWaitingEventListener;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accept_friends);
+        DataManager.Instance().currentContext = this;
+
         this.recyclerView = findViewById(R.id.recyclerview);
         this.backButton = findViewById(R.id.backButton);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -51,7 +57,7 @@ public class FriendsAcceptActivity extends AppCompatActivity {
         });
 
         ServerConnectManager serverConnectManager = new ServerConnectManager(ServerConnectManager.Path.FRIENDS.getPath("getWaitingList.php"))
-                .add("userId", DataManager.Instance().userId);
+                .add("userId", DataManager.Instance().stringUserId());
 
         serverConnectManager.postEnqueue(new ServerConnectManager.EasyCallback() {
             @Override
@@ -78,14 +84,16 @@ public class FriendsAcceptActivity extends AppCompatActivity {
             }
         });
 
-        SocketEventListener.addEvent(SocketEventListener.eType.REMOVE_WAITING_DATA, (jsonUtil)->{
+        removeWaitingEventListener = (jsonUtil)->{
             for (DataModel dataModel: waitingList) {
                 if(dataModel.getUserId().equals(jsonUtil.getString(JsonUtil.Key.USER_ID, ""))){
                     waitingList.remove(dataModel);
                     runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
                 }
             }
-        });
+            return false;
+        };
+        SocketEventListener.addEvent(SocketEventListener.eType.REMOVE_WAITING, removeWaitingEventListener);
 
         /*
         TODO: 이부분을 볼때 업데이트 되는 데이터는 요청이 발생하지 않아도
@@ -93,24 +101,31 @@ public class FriendsAcceptActivity extends AppCompatActivity {
          따라서 WebsocketEcho부분에 이벤트를 받아서 데이터를 업데이트 되도록 해야한다.
          따라서 이벤트 할당 기능을 만들어야한다.
          */
-        SocketEventListener.addEvent(SocketEventListener.eType.ADD_WAITING, (jsonUtil)->{
+        addWaitingEventListener = (jsonUtil)->{
             waitingList.add(new DataModel(jsonUtil.getString(JsonUtil.Key.USER_ID, ""),jsonUtil.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
             runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
-        });
+            return false;
+        };
+        SocketEventListener.addEvent(SocketEventListener.eType.ADD_WAITING, addWaitingEventListener);
 
-        SocketEventListener.addEvent(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, (jsonUtil)->{
+        addFriendOnWaitingEventListener = (jsonUtil)->{
             SocketConnection.LOG(jsonUtil.toString());
             String userId = jsonUtil.getString(JsonUtil.Key.USER_ID, "");
             waitingList = waitingList.stream()
                     .filter(dataModel -> !dataModel.getUserId().equals(userId))
                     .collect(Collectors.toList());
             runOnUiThread(()-> recyclerView.getAdapter().notifyDataSetChanged());
-        });
+            return false;
+        };
+        SocketEventListener.addEvent(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, addFriendOnWaitingEventListener);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        SocketEventListener.removeEvent(SocketEventListener.eType.REMOVE_WAITING, removeWaitingEventListener);
+        SocketEventListener.removeEvent(SocketEventListener.eType.ADD_WAITING, addWaitingEventListener);
+        SocketEventListener.removeEvent(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, addFriendOnWaitingEventListener);
     }
 
     public static class DataAdapter extends RecyclerView.Adapter<DataViewHolder> {
@@ -158,8 +173,24 @@ public class FriendsAcceptActivity extends AppCompatActivity {
                             .add(JsonUtil.Key.TYPE, SocketEventListener.eType.ADD_FRIEND_ON_WAITING)
                             .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
                             .add(JsonUtil.Key.USER_ID1, userId));
+                    int index = dataAdapter.dataModelList.indexOf(dataModel);
                     dataAdapter.dataModelList.remove(dataModel);
-                    dataAdapter.notifyDataSetChanged();
+                    dataAdapter.notifyItemRangeRemoved(index,1);
+                }
+            });
+
+            itemView.findViewById(R.id.denyFriendButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SocketConnection.LOG(dataModel.getName() + "의 요청이 거절됨");
+                    SocketConnection.sendMessage(new JsonUtil()
+                            .add(JsonUtil.Key.TYPE, SocketEventListener.eType.REMOVE_WAITING)
+                            .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
+                            .add(JsonUtil.Key.USER_ID1, userId));
+
+                    int index = dataAdapter.dataModelList.indexOf(dataModel);
+                    dataAdapter.dataModelList.remove(dataModel);
+                    dataAdapter.notifyItemRangeRemoved(index,1);
                 }
             });
         }

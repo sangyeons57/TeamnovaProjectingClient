@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.StringCheck;
 import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 import com.google.android.material.textfield.TextInputEditText;
@@ -50,6 +51,7 @@ public class FindPasswordActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_password);
+        DataManager.Instance().currentContext = this;
 
         nextButton = findViewById(R.id.next_button);
         emailInput = findViewById(R.id.email_input);

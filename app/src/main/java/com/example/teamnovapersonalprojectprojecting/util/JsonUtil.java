@@ -4,6 +4,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +16,7 @@ public class JsonUtil {
     public enum Key {
         NONE("NONE"),
         MESSAGE("message"),
+        MEMBERS("members"),
         STATUS("status"),
         TYPE("type"),
         ID("id"),
@@ -21,15 +24,22 @@ public class JsonUtil {
         USER_ID("userId"),
         USER_ID1("userId1"),
         USER_ID2("userId2"),
+        OTHER_ID("otherId"),
         USERNAME("username"),
+        OTHER_USERNAME("otherUsername"),
         DATETIME("datetime"),
         DATA("data"),
         IS_SELF("isSelf"),
+        IS_DM("isDM"),
+        IS_MODIFIED("isModified"),
         CREATE_TIME("createTime"),
         UPDATE_TIME("updateTime"),
         CHANNEL_ID("channelId"),
+        CHANNEL_NAME("channelName"),
         FRIEND_NAME("friendName"),
         WAITING_USER_NAME("waitingUserName"),
+        LIMIT("limit"),
+        OFFSET("offset"),
         ;
 
         private String keyName;
@@ -50,6 +60,21 @@ public class JsonUtil {
             }
             return Key.NONE;
         }
+    }
+    public static void LOG(String title, int logText){
+        Log.d(SocketConnection.class.getSimpleName(), title +": " + logText);
+    }
+    public static void LOG(String title, String logText){
+        Log.d(SocketConnection.class.getSimpleName(), title +": " + logText);
+    }
+    public static void LOG(String logText){
+        Log.d(SocketConnection.class.getSimpleName(), logText);
+    }
+    public static void LOG(int logText){
+        Log.d(SocketConnection.class.getSimpleName(), ""+logText);
+    }
+    public static void LOGe(String logText){
+        Log.e(SocketConnection.class.getSimpleName(), logText);
     }
 
     private JSONObject jsonObject;
@@ -128,6 +153,7 @@ public class JsonUtil {
         try {
             return jsonObject.getJSONArray(key.keyName);
         } catch (JSONException e) {
+            LOGe(e.getMessage());
             return defaultValue;
         }
     }

@@ -14,6 +14,7 @@ import com.example.teamnovapersonalprojectprojecting.ui.join.AuthCodeFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.join.EmailFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.join.SetNameFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.join.SetPasswordFragment;
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.EncryptedSharedPrefsManager;
 import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 
@@ -32,6 +33,7 @@ public class JoinActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join); // Your activity layout
+        DataManager.Instance().currentContext = this;
 
         // Start with the EmailFragment
         showEmailFragment();

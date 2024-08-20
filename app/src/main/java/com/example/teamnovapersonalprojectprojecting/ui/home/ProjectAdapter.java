@@ -1,7 +1,6 @@
 package com.example.teamnovapersonalprojectprojecting.ui.home;
 
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +9,12 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.teamnovapersonalprojectprojecting.ChatActivity;
+import com.example.teamnovapersonalprojectprojecting.chat.ChatActivity;
 import com.example.teamnovapersonalprojectprojecting.R;
-import com.example.teamnovapersonalprojectprojecting.SearchActivity;
 
 import java.util.List;
 
-public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MyViewHolder> {
+public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.MyViewHolder> {
 
     private List<MyItem> itemList;
 
@@ -33,7 +31,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.MyViewHo
         }
     }
 
-    public ChannelAdapter(List<MyItem> itemList) {
+    public ProjectAdapter(List<MyItem> itemList) {
         this.itemList = itemList;
     }
 

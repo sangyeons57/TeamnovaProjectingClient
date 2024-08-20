@@ -99,6 +99,7 @@ public class SocketConnection {
                                 while (true){
                                     String message = taskQueue.take();
                                     out.println(message);
+                                    LOG("FINISH Sent to Server", message);
                                 }
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
@@ -109,6 +110,9 @@ public class SocketConnection {
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                     LOGe(e.getMessage());
+                    /**
+                     * 오프라인 기능 대처하는 만들려면 이쪽에서 구현하면됨
+                     */
                     throw new RuntimeException(e);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -133,7 +137,6 @@ public class SocketConnection {
             if (Instance().out != null) {
                 LOG("START Sent to Server", message);
                 Instance().taskQueue.put(message);
-                LOG("FINISH Sent to Server", message);
             } else {
                 LOG("Out is null");
             }

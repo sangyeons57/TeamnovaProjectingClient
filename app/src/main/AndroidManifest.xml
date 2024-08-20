@@ -31,7 +31,7 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".PersonalSettingActivity" />
         <activity android:name=".ui.profile.setting.ChangePasswordActivity" />
-        <activity android:name=".ChatActivity" />
+        <activity android:name=".chat.ChatActivity" />
         <activity android:name=".SearchActivity" />
         <activity android:name=".FriendsActivity" />
         <activity android:name=".FriendsAcceptActivity" />

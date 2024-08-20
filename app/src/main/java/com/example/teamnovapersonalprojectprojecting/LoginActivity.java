@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
@@ -42,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login); // Assuming your layout file is activity_login.xml
+        DataManager.Instance().currentContext = this;
 
         Button loginButton = findViewById(R.id.loginButton);
         TextView findPasswordText = findViewById(R.id.findPasswordText);
@@ -158,31 +161,33 @@ public class LoginActivity extends AppCompatActivity {
                 final String status = jsonObject.getString("status");
                 final String message = jsonObject.getString("message");
                 if(status.equals("success")) {
-                    final String userId = jsonObject.getString("user_id");
+                    final int userId = jsonObject.getInt("user_id");
                     final String username = jsonObject.getString("user_name");
                     Log.d("JoinActivity", status);
                     Log.d("JoinActivity", message);
-                    Log.d("JoinActivity", userId);
+                    Log.d("JoinActivity", ""+userId);
                     DataManager.Instance().userId = userId;
                     DataManager.Instance().username = username;
 
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    DataManager.Instance().setFriendList();
 
-                    /* weboscket 코드
-                    WebsocketManager.Generate(WebSocketEcho.Instance().getWebsocket()).setJsonUtil(new JsonUtil()
-                            .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId))
-                            .Send(WebsocketManager.Type.SET_USER);
-                    WebSocketEcho.Instance().addEventListener(WebsocketManager.Type.SET_USER, (websocketManager)->{
-                        WebsocketManager.Log(websocketManager.getJsonUtil().getJsonString());
-                    });
-                    */
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
 
                     SocketConnection.sendMessage(new JsonUtil()
                             .add(JsonUtil.Key.TYPE, SocketEventListener.eType.SET_USER.toString())
                             .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId));
-                    SocketEventListener.addEvent(SocketEventListener.eType.SET_USER, (jsonObject1)->{
-                        SocketEventListener.LOG(jsonObject1.toString());
+
+                    SocketEventListener.addEvent(SocketEventListener.eType.SET_USER, new SocketEventListener.EventListener() {
+                        @Override
+                        public boolean run(JsonUtil jsonUtil) {
+                            SocketEventListener.LOG(jsonUtil.toString());
+                            //DM리스트 가지고 오기
+                            SocketConnection.sendMessage(new JsonUtil().add(JsonUtil.Key.TYPE, SocketEventListener.eType.RELOAD_DM_LIST.toString()));
+                            SocketEventListener.addRemoveQueue(this);
+                            return false;
+                        }
                     });
+
 
                     EncryptedSharedPrefsManager.init(LoginActivity.this, EncryptedSharedPrefsManager.LOGIN);
                     EncryptedSharedPrefsManager.putString("email", email);
@@ -199,5 +204,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }

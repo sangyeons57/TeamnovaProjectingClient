@@ -2,7 +2,6 @@ package com.example.teamnovapersonalprojectprojecting;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,19 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.ui.home.FriendAddDialogFragment;
-import com.example.teamnovapersonalprojectprojecting.ui.profile.ChangeStatusDialogFragment;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
-import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FriendsActivity extends AppCompatActivity {
     private Button acceptFriendButton;
@@ -40,19 +30,21 @@ public class FriendsActivity extends AppCompatActivity {
     private TextView addFriendTextView;
     private RecyclerView recyclerView;
 
-    private List<DataModel> friendsList;
+    SocketEventListener.EventListener eventListener;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
+        DataManager.Instance().currentContext = this;
+
         this.recyclerView = findViewById(R.id.recyclerview);
         acceptFriendButton = findViewById(R.id.acceptFriendButton);
         backButton = findViewById(R.id.backButton);
         addFriendTextView = findViewById(R.id.addFriedTextView);
 
-        friendsList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new FriendsActivity.DataAdapter(friendsList));
+        recyclerView.setAdapter(new FriendsActivity.DataAdapter(DataManager.Instance().friendList));
 
         DataManager.Instance().currentContext = this;
 
@@ -69,40 +61,20 @@ public class FriendsActivity extends AppCompatActivity {
             dialogFragment.show(getSupportFragmentManager(), "FriendAddDialogFragment");
         });
 
-        ServerConnectManager serverConnectManager = new ServerConnectManager(ServerConnectManager.Path.FRIENDS.getPath("getFriendsList.php"))
-                .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId);
 
-        serverConnectManager.postEnqueue(new ServerConnectManager.EasyCallback() {
-            @Override
-            protected void onGetJson(JSONObject jsonObject) throws IOException, JSONException {
-                super.onGetJson(jsonObject);
-                if (jsonObject.getString(JsonUtil.Key.STATUS.toString()).equals("success")) {
-                    JSONArray jsonArray;
-                    try {
-                        jsonArray = jsonObject.getJSONArray("data");
-                    } catch (JSONException e) {
-                        jsonArray = new JSONArray();
-                    }
-                    Log.d("FriendsActivity", jsonArray.toString());
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject waiting = new JSONObject(jsonArray.getString(i));
-                        friendsList.add(new FriendsActivity.DataModel(waiting.getString(JsonUtil.Key.ID.toString()), waiting.getString(JsonUtil.Key.USERNAME.toString())));
-                    }
-                    runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
-                } else if (jsonObject.getString(JsonUtil.Key.STATUS.toString()).equals("success_0")) {
-                } else {
-                    ServerConnectManager.Loge(jsonObject.getString("errorMessage"));
-                }
-            }
-        });
-
-        SocketEventListener.addEvent(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, (jsonUtil)->{
-            friendsList.add(new DataModel(jsonUtil.getString(JsonUtil.Key.USER_ID, ""), jsonUtil.getString(JsonUtil.Key.USERNAME, "AddWaiting 문제 발생")));
+        eventListener = (jsonUtil)->{
             runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
-        });
+            return false;
+        };
+        SocketEventListener.addEvent(SocketEventListener.eType.UPDATE_FRIEND_LIST, eventListener);
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SocketEventListener.removeEvent(SocketEventListener.eType.UPDATE_FRIEND_LIST, eventListener);
+    }
     public static class DataAdapter extends RecyclerView.Adapter<FriendsActivity.DataViewHolder> {
         public List<FriendsActivity.DataModel> dataModelList;
         public DataAdapter (List<FriendsActivity.DataModel> dataList) {
@@ -143,7 +115,7 @@ public class FriendsActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     SocketConnection.sendMessage(new JsonUtil()
-                            .add(JsonUtil.Key.TYPE, SocketEventListener.eType.JOIN_DM_CHANNEL)
+                            .add(JsonUtil.Key.TYPE, SocketEventListener.eType.JOIN_CHANNEL)
                             .add(JsonUtil.Key.USER_ID1, DataManager.Instance().userId)
                             .add(JsonUtil.Key.USER_ID2, userId));
                 }
@@ -152,21 +124,17 @@ public class FriendsActivity extends AppCompatActivity {
 
         public void setData(FriendsActivity.DataModel dataModel){
             this.dataModel = dataModel;
-            nameTextView.setText(dataModel.getName());
             userId = dataModel.getUserId();
         }
     }
 
     public static class DataModel {
         private String userId;
-        private String name;
-        public DataModel(String userId,String name) {
+        public DataModel(String userId) {
             this.userId = userId;
-            this.name = name;
         }
 
         // Getters
-        public String getName() { return name; }
         public String getUserId() { return userId; }
     }
 }

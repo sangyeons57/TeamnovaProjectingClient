@@ -63,33 +63,39 @@ public class FriendAddDialogFragment extends DialogFragment {
                         .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
                         .add(JsonUtil.Key.USERNAME, DataManager.Instance().username));
 
-                SocketEventListener.addEvent(SocketEventListener.eType.ADD_WAITING, (jsonUtil)->{
-                    SocketConnection.LOG(jsonUtil.toString());
-                    final String status = jsonUtil.getString(JsonUtil.Key.STATUS, "error");
-                    if (status.equals("success")){
-                        mainHandler.post(() -> {
-                            infoTextView.setText("[" + waitingUserName + "] 에게 친구요청을 보냈습니다.");
-                            infoTextView.setVisibility(View.VISIBLE);
-                            infoTextView.setTextColor(Color.BLACK);
-                        });
+                SocketEventListener.addEvent(SocketEventListener.eType.ADD_WAITING, new SocketEventListener.EventListener() {
+                    @Override
+                    public boolean run(JsonUtil jsonUtil) {
+                        SocketConnection.LOG(jsonUtil.toString());
+                        final String status = jsonUtil.getString(JsonUtil.Key.STATUS, "error");
+                        if (status.equals("success")){
+                            mainHandler.post(() -> {
+                                infoTextView.setText("[" + waitingUserName + "] 에게 친구요청을 보냈습니다.");
+                                infoTextView.setVisibility(View.VISIBLE);
+                                infoTextView.setTextColor(Color.BLACK);
+                            });
 
-                        final String message = jsonUtil.getString(JsonUtil.Key.DATA,"data 읽기 실패");
-                        ServerConnectManager.Log(status);
-                        ServerConnectManager.Log(message);
-                    } else if (status.equals("success_0")) {
-                        mainHandler.post(() -> {
-                            infoTextView.setText("[" + waitingUserName + "] 는 이미 친구 요청을 보냈습니다.");
-                            infoTextView.setVisibility(View.VISIBLE);
-                            infoTextView.setTextColor(Color.RED);
-                        });
-                    } else if (status.equals("error")) {
-                        mainHandler.post(() -> {
-                            infoTextView.setText("[" + waitingUserName + "] 에게 친구요청에 실패 했습니다.");
-                            infoTextView.setVisibility(View.VISIBLE);
-                            infoTextView.setTextColor(Color.RED);
-                        });
-                    } else {
-                        ServerConnectManager.Log("FriendAddDialogFragment couldn't handle it: " + jsonUtil.toString());
+                            final String message = jsonUtil.getString(JsonUtil.Key.DATA,"data 읽기 실패");
+                            ServerConnectManager.Log(status);
+                            ServerConnectManager.Log(message);
+                        } else if (status.equals("success_0")) {
+                            mainHandler.post(() -> {
+                                infoTextView.setText("[" + waitingUserName + "] 는 이미 친구 요청을 보냈습니다.");
+                                infoTextView.setVisibility(View.VISIBLE);
+                                infoTextView.setTextColor(Color.RED);
+                            });
+                        } else if (status.equals("error")) {
+                            mainHandler.post(() -> {
+                                infoTextView.setText("[" + waitingUserName + "] 에게 친구요청에 실패 했습니다.");
+                                infoTextView.setVisibility(View.VISIBLE);
+                                infoTextView.setTextColor(Color.RED);
+                            });
+                        } else {
+                            ServerConnectManager.Log("FriendAddDialogFragment couldn't handle it: " + jsonUtil.toString());
+                        }
+                        SocketEventListener.addRemoveQueue(this);
+
+                        return true;
                     }
                 });
             }

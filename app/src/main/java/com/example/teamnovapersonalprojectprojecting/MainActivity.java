@@ -3,6 +3,7 @@ package com.example.teamnovapersonalprojectprojecting;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        DataManager.Instance().currentContext = this;
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
 

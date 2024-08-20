@@ -21,6 +21,7 @@ public class PersonalSettingActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personal_setting);
+        DataManager.Instance().currentContext = this;
 
         changeNameTextView = findViewById(R.id.change_name_textview);
         changePasswordTextView = findViewById(R.id.change_password_textview);

@@ -1,8 +1,6 @@
 package com.example.teamnovapersonalprojectprojecting.ui.home;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
-import android.content.Intent;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,17 +10,23 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.teamnovapersonalprojectprojecting.ChatActivity;
 import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
+import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 
 import java.util.List;
 
 public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
 
-    private List<MyItem> itemList;
+    private List<DataModel> itemList;
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
         ImageView imageView;
+        int userId;
+        int channelId;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -32,13 +36,37 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                    startActivity(itemView.getContext(), intent, null);
+                    SocketConnection.sendMessage(new JsonUtil()
+                            .add(JsonUtil.Key.TYPE, SocketEventListener.eType.JOIN_CHANNEL)
+                            .add(JsonUtil.Key.CHANNEL_ID, channelId));
                 }
             });
         }
+
+        public void setData(DataModel dataModel){
+            userId = dataModel.getUserId();
+            Cursor cursor = null;
+            try {
+                cursor = LocalDBMain.GetTable(DB_UserList.class).getUser(userId);
+                if(cursor ==  null){
+                    LocalDBMain.GetTable(DB_UserList.class).addUserByServer(userId, jsonUtil -> {
+                        textView.setText(jsonUtil.getString(JsonUtil.Key.USERNAME, ""));
+                    });
+                } else {
+                    textView.setText(cursor.getString(DB_UserList.username));
+                }
+
+            } catch (Exception e){
+                e.printStackTrace();
+            } finally {
+                if(cursor != null) {
+                    cursor.close();
+                }
+            };
+            channelId = dataModel.getChannelId();
+        }
     }
-    public DMAdapter(List<MyItem> itemList){
+    public DMAdapter(List<DataModel> itemList){
         this.itemList = itemList;
     }
 
@@ -52,9 +80,7 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        MyItem item = itemList.get(position);
-        holder.imageView.setImageResource(item.getImage());
-        holder.textView.setText(item.getName());
+        holder.setData(itemList.get(position));
     }
 
     @Override
@@ -62,22 +88,17 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
         return itemList.size();
     }
 
-    public static class  MyItem {
-        private int image;
-        private String name;
-
-        public String getName() {
-            return name;
+    public static class DataModel {
+        private int userId;
+        private int channelId;
+        public DataModel(int userId, int channelId) {
+            this.userId = userId;
+            this.channelId = channelId;
         }
 
-        public int getImage() {
-            return image;
-        }
-
-        public MyItem(int image, String name) {
-            this.image = image;
-            this.name = name;
-        }
+        // Getters
+        public int getUserId() { return userId; }
+        public int getChannelId() { return channelId; }
     }
 
 }
