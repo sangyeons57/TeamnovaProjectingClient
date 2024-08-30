@@ -1,12 +1,11 @@
-package com.example.teamnovapersonalprojectprojecting;
+package com.example.teamnovapersonalprojectprojecting.activity;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 
 public class SearchActivity extends AppCompatActivity {

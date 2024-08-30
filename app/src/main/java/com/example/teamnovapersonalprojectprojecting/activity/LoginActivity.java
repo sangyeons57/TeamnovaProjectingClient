@@ -1,4 +1,4 @@
-package com.example.teamnovapersonalprojectprojecting;
+package com.example.teamnovapersonalprojectprojecting.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FriendList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
@@ -169,30 +171,34 @@ public class LoginActivity extends AppCompatActivity {
                     DataManager.Instance().userId = userId;
                     DataManager.Instance().username = username;
 
-                    DataManager.Instance().setFriendList();
-
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
 
                     SocketConnection.sendMessage(new JsonUtil()
                             .add(JsonUtil.Key.TYPE, SocketEventListener.eType.SET_USER.toString())
                             .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId));
-
-                    SocketEventListener.addEvent(SocketEventListener.eType.SET_USER, new SocketEventListener.EventListener() {
+                    SocketEventListener.addAddEventQueue(SocketEventListener.eType.SET_USER, new SocketEventListener.EventListener() {
                         @Override
                         public boolean run(JsonUtil jsonUtil) {
                             SocketEventListener.LOG(jsonUtil.toString());
+
+                            LocalDBMain.GetTable(DB_FriendList.class).addFriendByServer();
+                            LocalDBMain.GetTable(DB_UserList.class).addUserByServer(DataManager.Instance().userId, null);
+                            LocalDBMain.GetTable(DB_UserList.class).updateAllDataByUserId(null);
+
                             //DM리스트 가지고 오기
                             SocketConnection.sendMessage(new JsonUtil().add(JsonUtil.Key.TYPE, SocketEventListener.eType.RELOAD_DM_LIST.toString()));
-                            SocketEventListener.addRemoveQueue(this);
+
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
+
+                            SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.SET_USER, this);
                             return false;
                         }
                     });
 
-
                     EncryptedSharedPrefsManager.init(LoginActivity.this, EncryptedSharedPrefsManager.LOGIN);
                     EncryptedSharedPrefsManager.putString("email", email);
                     EncryptedSharedPrefsManager.putString("password", password);
-                    finish();
+
                 } else if(status.equals("email_error")) {
                     mainHandler.post(()->{
                         emailInputLayout.setError(message);

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="350dp"
+    xmlns:andoird="http://schemas.android.com/tools"
+    android:padding="16dp"
+    android:scrollbars="none"
+    android:background="@drawable/dialog_background">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/dialog_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="카테고리 이름"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+
+        <!-- 여기 리사이클러 뷰로 다시만들어야함 임시로 만드는거임 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="40dp"
+            android:padding="10dp"
+            android:background="@drawable/dialog_background"
+            android:backgroundTint="@color/white"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/edit_category_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="카테고리 편집하기"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:paddingLeft="20dp"
+                android:backgroundTint="@color/default_app_color_d1"
+                />
+
+            <Button
+                android:id="@+id/create_channel_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="체널 추가하기"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:paddingLeft="20dp"
+                android:backgroundTint="@color/default_app_color_d1"
+                />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

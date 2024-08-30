@@ -1,6 +1,7 @@
-package com.example.teamnovapersonalprojectprojecting;
+package com.example.teamnovapersonalprojectprojecting.activity;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,12 +17,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_DMList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FriendList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.ui.home.FriendAddDialogFragment;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FriendsActivity extends AppCompatActivity {
@@ -31,6 +39,9 @@ public class FriendsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     SocketEventListener.EventListener eventListener;
+
+    private FriendsActivity.DataAdapter adapter; // RecyclerView.Adapter
+    private List<FriendsActivity.DataModel> dataModelList; // 데이터 목록
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,9 +55,11 @@ public class FriendsActivity extends AppCompatActivity {
         addFriendTextView = findViewById(R.id.addFriedTextView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new FriendsActivity.DataAdapter(DataManager.Instance().friendList));
+        dataModelList = new ArrayList<>();
+        adapter = new FriendsActivity.DataAdapter(dataModelList);
+        recyclerView.setAdapter(adapter);
 
-        DataManager.Instance().currentContext = this;
+        dataModelList.addAll(LocalDBMain.GetTable(DB_FriendList.class).getFriendListUseDataModel());
 
         acceptFriendButton.setOnClickListener(v -> {
             startActivity(new Intent(FriendsActivity.this, FriendsAcceptActivity.class));
@@ -63,17 +76,17 @@ public class FriendsActivity extends AppCompatActivity {
 
 
         eventListener = (jsonUtil)->{
-            runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
+            runOnUiThread(recyclerView.getAdapter()::notifyDataSetChanged);
             return false;
         };
-        SocketEventListener.addEvent(SocketEventListener.eType.UPDATE_FRIEND_LIST, eventListener);
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.UPDATE_FRIEND_LIST, eventListener);
     }
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SocketEventListener.removeEvent(SocketEventListener.eType.UPDATE_FRIEND_LIST, eventListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.UPDATE_FRIEND_LIST, eventListener);
     }
     public static class DataAdapter extends RecyclerView.Adapter<FriendsActivity.DataViewHolder> {
         public List<FriendsActivity.DataModel> dataModelList;
@@ -104,20 +117,20 @@ public class FriendsActivity extends AppCompatActivity {
         FriendsActivity.DataModel dataModel;
         TextView nameTextView;
         ImageView friendProfileImage;
-        String userId;
+        int userId;
+        int channelId;
 
         public DataViewHolder(@NonNull View itemView, FriendsActivity.DataAdapter dataAdapter) {
             super(itemView);
             this.dataAdapter = dataAdapter;
             nameTextView = itemView.findViewById(R.id.friendName);
             friendProfileImage = itemView.findViewById(R.id.friendProfileImage);
-            itemView.findViewById(R.id.DMButton).setOnClickListener(new View.OnClickListener() {
+            itemView.findViewById(R.id.dmButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     SocketConnection.sendMessage(new JsonUtil()
                             .add(JsonUtil.Key.TYPE, SocketEventListener.eType.JOIN_CHANNEL)
-                            .add(JsonUtil.Key.USER_ID1, DataManager.Instance().userId)
-                            .add(JsonUtil.Key.USER_ID2, userId));
+                            .add(JsonUtil.Key.CHANNEL_ID, channelId));
                 }
             });
         }
@@ -125,16 +138,26 @@ public class FriendsActivity extends AppCompatActivity {
         public void setData(FriendsActivity.DataModel dataModel){
             this.dataModel = dataModel;
             userId = dataModel.getUserId();
+            channelId = LocalDBMain.GetTable(DB_DMList.class).getChannelId(userId);
+
+            LocalDBMain.GetTable(DB_UserList.class).getUser(userId).execute(new CursorReturn.Execute() {
+                @Override
+                public void run(Cursor cursor) {
+                    if(cursor.moveToFirst()) {
+                        nameTextView.setText(cursor.getString(1));
+                    }
+                }
+            });
         }
     }
 
     public static class DataModel {
-        private String userId;
-        public DataModel(String userId) {
+        private int userId;
+        public DataModel(int userId) {
             this.userId = userId;
         }
 
         // Getters
-        public String getUserId() { return userId; }
+        public int getUserId() { return userId; }
     }
 }

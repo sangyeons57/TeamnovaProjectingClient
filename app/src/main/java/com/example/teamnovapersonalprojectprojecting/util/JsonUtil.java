@@ -25,6 +25,10 @@ public class JsonUtil {
         USER_ID1("userId1"),
         USER_ID2("userId2"),
         OTHER_ID("otherId"),
+        PROJECT_ID("projectId"),
+        CATEGORY_ID("categoryId"),
+        NAME("name"),
+        PROJECT_NAME("projectName"),
         USERNAME("username"),
         OTHER_USERNAME("otherUsername"),
         DATETIME("datetime"),
@@ -32,6 +36,8 @@ public class JsonUtil {
         IS_SELF("isSelf"),
         IS_DM("isDM"),
         IS_MODIFIED("isModified"),
+        IS_PRIVATE("isPrivate"),
+        IS_VALID("isValid"),
         CREATE_TIME("createTime"),
         UPDATE_TIME("updateTime"),
         CHANNEL_ID("channelId"),
@@ -40,6 +46,11 @@ public class JsonUtil {
         WAITING_USER_NAME("waitingUserName"),
         LIMIT("limit"),
         OFFSET("offset"),
+        FRIENDS("friends"),
+        DM_CHANNELS("dmChannels"),
+        JSON_ARRAY("jsonArray"),
+        JSON_OBJECT("jsonObject"),
+        TOKEN("token"),
         ;
 
         private String keyName;

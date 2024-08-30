@@ -49,6 +49,8 @@
             android:layout_height="wrap_content"
             android:textSize="17sp"
             android:textColor="@color/white"
+            android:autoLink="none"
+            android:linksClickable="true"
             app:layout_constraintTop_toBottomOf="@id/nameTextView"
             app:layout_constraintStart_toStartOf="parent"/>
 

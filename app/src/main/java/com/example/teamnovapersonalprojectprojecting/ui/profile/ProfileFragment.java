@@ -12,10 +12,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.example.teamnovapersonalprojectprojecting.PersonalSettingActivity;
+import com.example.teamnovapersonalprojectprojecting.activity.PersonalSettingActivity;
 import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
-import com.example.teamnovapersonalprojectprojecting.FriendsActivity;
+import com.example.teamnovapersonalprojectprojecting.activity.FriendsActivity;
 
 public class ProfileFragment extends Fragment {
     private Button statusButton;

@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 
+import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.LocalDBAttribute;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 
@@ -24,28 +25,52 @@ public class DB_DMList extends LocalDBAttribute {
     public void addDMList(int channelId, int otherId, String lastTime){
         LocalDBMain.LOG(DB_DMList.class.getSimpleName(), channelId + " " + otherId + " " + lastTime);
 
-        SQLiteDatabase db = this.sqlite.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("channelId", channelId);
-        values.put("otherId", otherId);
-        values.put("lastTime", lastTime);
+        try (SQLiteDatabase db = this.sqlite.getWritableDatabase();){
+            ContentValues values = new ContentValues();
+            values.put("channelId", channelId);
+            values.put("otherId", otherId);
+            values.put("lastTime", lastTime);
 
-        db.insert(getTableName(), null, values);
-        db.close();
+            db.insert(getTableName(), null, values);
+        }
     }
 
-    public Cursor getAllOrderByLastTime(){
+    public CursorReturn getAllOrderByLastTime(){
         SQLiteDatabase db = this.sqlite.getReadableDatabase();
         String query = "SELECT mainTable.channelId AS channelId, " +
                 "mainTable.otherId AS otherId, " +
                 "mainTable.lastTime AS lastTime, " +
                 "userListTable.username AS otherUsername " +
                 "FROM " + getTableName() + " AS mainTable " +
-                "INNER JOIN " + LocalDBMain.GetTable(DB_UserList.class).getTableName() + " AS userListTable " +
-                "ON mainTable.otherId = userListTable.userId " +
+                "LEFT JOIN " + LocalDBMain.GetTable(DB_UserList.class).getTableName() + " AS userListTable " +
+                "ON mainTable.otherId = userListTable.id " +
                 "ORDER BY mainTable.lastTime DESC";
 
-        return db.rawQuery(query, null);
+        return new CursorReturn(db.rawQuery(query, null), db);
+    }
+
+    public int getChannelId(int otherId){
+        String query = "SELECT channelId FROM " + getTableName() + " WHERE otherId = ?";
+        try( SQLiteDatabase db = this.sqlite.getReadableDatabase();
+             Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(otherId)})){
+            if(cursor.moveToFirst()){
+                return cursor.getInt(0);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return DataManager.NOT_SETUP_I;
+    }
+
+    public int getOtherId(int channelId){
+        String query = "SELECT otherId FROM " + getTableName() + " WHERE channelId = ? ";
+        try ( SQLiteDatabase db = this.sqlite.getReadableDatabase();
+            Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(channelId)})){
+            if(cursor.moveToFirst()){
+                return cursor.getInt(0);
+            }
+        }
+        return DataManager.NOT_SETUP_I;
     }
 
     public void changeLastTime(int channelId, String lastTime){

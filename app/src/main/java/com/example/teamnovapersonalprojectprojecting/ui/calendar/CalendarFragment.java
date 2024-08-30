@@ -10,21 +10,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.example.teamnovapersonalprojectprojecting.MainActivity;
 import com.example.teamnovapersonalprojectprojecting.R;
 
 import java.util.ArrayList;
 
-import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class CalendarFragment extends Fragment {

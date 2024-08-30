@@ -4,7 +4,9 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
+import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.LocalDBAttribute;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
@@ -65,12 +67,13 @@ public class DB_ChatTable extends LocalDBAttribute {
         return DataManager.NOT_SETUP_I;
     }
 
-    public Cursor getChatDataRangeFromBack(int channelId, int limit, int offset) {
+    public CursorReturn getChatDataRangeFromBack(int channelId, int limit, int offset) {
+        LocalDBChat.LOG("getChatDataRangeFromBack", "channelId: " + channelId + ", limit: " + limit + ", offset: " + offset);
         String query = "SELECT * FROM " + getTableName() + " WHERE channelId = ? ORDER BY chatId DESC LIMIT ? OFFSET ?";
         SQLiteDatabase db = this.sqlite.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(channelId), String.valueOf(limit), String.valueOf(offset)});
         LocalDBChat.LOG("getChatDataRangeFromBack", cursor.getCount());
-        return cursor;
+        return new CursorReturn(cursor, db);
     }
 
 

@@ -11,11 +11,12 @@ import com.example.teamnovapersonalprojectprojecting.local.database.LocalDBAttri
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LocalDBMain extends SQLiteOpenHelper {
     public static final String DB_NAME = "Main.db";
-    public static final int DB_VERSION = 1;
+    public static final int DB_VERSION = 11;
 
     private Map<Class<? extends LocalDBAttribute>, LocalDBAttribute> databaseMainMap;
 
@@ -26,6 +27,10 @@ public class LocalDBMain extends SQLiteOpenHelper {
         }
         return instance;
     }
+    public static void Reset(){
+        instance = null ;
+    }
+
     public static void LOG(String title, int logText){
         Log.d(LocalDBMain.class.getSimpleName(), title +": " + logText);
     }
@@ -55,6 +60,11 @@ public class LocalDBMain extends SQLiteOpenHelper {
         databaseMainMap.put(DB_DMList.class, new DB_DMList(this));
         databaseMainMap.put(DB_UserList.class, new DB_UserList(this));
         databaseMainMap.put(DB_ChannelList.class, new DB_ChannelList(this));
+        databaseMainMap.put(DB_FriendList.class, new DB_FriendList(this));
+        databaseMainMap.put(DB_Project.class, new DB_Project(this));
+        databaseMainMap.put(DB_ProjectMember.class, new DB_ProjectMember(this));
+        databaseMainMap.put(DB_ProjectStructure.class, new DB_ProjectStructure(this));
+        databaseMainMap.put(DB_ProjectChannelList.class, new DB_ProjectChannelList(this));
     }
 
 
@@ -68,6 +78,13 @@ public class LocalDBMain extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         for (LocalDBAttribute attribute: databaseMainMap.values()) {
             db.execSQL(attribute.getCreateQuery());
+
+            if(attribute instanceof TriggerQuery){
+                for (String query: ((TriggerQuery)attribute).getTriggerQuery()) {
+                    LOG("TriggerQuery", query);
+                    db.execSQL(query);
+                }
+            }
         }
     }
 
@@ -77,5 +94,9 @@ public class LocalDBMain extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + attribute.getTableName());
         }
         onCreate(db);
+    }
+
+    public static interface TriggerQuery {
+        public List<String> getTriggerQuery();
     }
 }

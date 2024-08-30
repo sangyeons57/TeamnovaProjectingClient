@@ -15,7 +15,7 @@ public class CreateDMChannel implements SocketEventListener.EventListener {
         int channelId = jsonUtil.getInt(JsonUtil.Key.CHANNEL_ID, 0);
         String datetime = jsonUtil.getString(JsonUtil.Key.DATETIME, DataManager.getCurrentDateTime());
 
-        LocalDBMain.GetTable(DB_UserList.class).addUserByServer(channelId, null);
+        LocalDBMain.GetTable(DB_UserList.class).addUserByServer(userId, null);
         LocalDBMain.GetTable(DB_DMList.class).addDMList(channelId, userId, datetime);
         SocketConnection.sendMessage(new JsonUtil().add(JsonUtil.Key.TYPE, SocketEventListener.eType.RELOAD_DM_LIST));
 

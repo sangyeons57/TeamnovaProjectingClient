@@ -1,8 +1,9 @@
-package com.example.teamnovapersonalprojectprojecting;
+package com.example.teamnovapersonalprojectprojecting.activity;
 
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 

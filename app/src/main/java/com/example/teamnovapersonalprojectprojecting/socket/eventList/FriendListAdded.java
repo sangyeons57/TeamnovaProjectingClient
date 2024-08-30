@@ -1,16 +1,14 @@
 package com.example.teamnovapersonalprojectprojecting.socket.eventList;
 
-import com.example.teamnovapersonalprojectprojecting.FriendsActivity;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FriendList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
-import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
-
-import java.util.List;
 
 public class FriendListAdded implements SocketEventListener.EventListener{
     @Override
     public boolean run(JsonUtil jsonUtil) {
-        DataManager.Instance().friendList.add(new FriendsActivity.DataModel(jsonUtil.getString(JsonUtil.Key.USER_ID, "")));
+        LocalDBMain.GetTable(DB_FriendList.class).addOrUpdateFriend(jsonUtil.getInt(JsonUtil.Key.USER_ID, 0));
         SocketEventListener.callEvent(SocketEventListener.eType.UPDATE_FRIEND_LIST, new JsonUtil());
         return false;
     }

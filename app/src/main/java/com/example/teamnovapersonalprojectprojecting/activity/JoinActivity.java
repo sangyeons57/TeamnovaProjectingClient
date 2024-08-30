@@ -1,4 +1,4 @@
-package com.example.teamnovapersonalprojectprojecting;
+package com.example.teamnovapersonalprojectprojecting.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.ui.join.AuthCodeFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.join.EmailFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.join.SetNameFragment;

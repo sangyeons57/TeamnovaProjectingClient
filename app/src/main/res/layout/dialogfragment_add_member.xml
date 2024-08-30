@@ -22,61 +22,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        >
         <ImageButton
+            android:id="@+id/copy_link_button"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_marginHorizontal="20dp"
             android:src="@drawable/ic_copy"
             app:tint="@color/default_app_color_bl3"
+            android:layout_marginHorizontal="50dp"
             android:scaleType="fitCenter"
             android:background="@drawable/round_background_padding1"
             android:backgroundTint="@color/default_app_color_d1"/>
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
+
         <ImageButton
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/ic_share"
             app:tint="@color/default_app_color_bl3"
-            android:scaleType="fitCenter"
-            android:background="@drawable/round_background_padding1"
-            android:backgroundTint="@color/default_app_color_d1"/>
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-        <ImageButton
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginHorizontal="20dp"
-            android:src="@drawable/ic_linkmail"
-            app:tint="@color/default_app_color_bl3"
+            android:layout_marginHorizontal="50dp"
             android:scaleType="fitCenter"
             android:background="@drawable/round_background_padding1"
             android:backgroundTint="@color/default_app_color_d1"/>
     </LinearLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/serach_edit_text"
+    <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:padding="10dp"
         android:background="@drawable/dialog_background"
-        android:backgroundTint="@color/white" >
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/loginEmailInput"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:hint="검색하기"
-            android:inputType="textEmailAddress"
-            android:background="@color/white"/>
-
-    </com.google.android.material.textfield.TextInputLayout>
+        android:backgroundTint="@color/white"
+        android:hint="검색하기"
+        />
 
     <!-- 여기 리사이클러 뷰로 다시만들어야함 임시로 만드는거임 -->
     <LinearLayout

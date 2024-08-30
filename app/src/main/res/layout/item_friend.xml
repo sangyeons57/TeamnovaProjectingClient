@@ -33,7 +33,7 @@
         android:textSize="18sp"/>
 
     <Button
-        android:id="@+id/DMButton"
+        android:id="@+id/dmButton"
         android:layout_width="60dp"
         android:layout_height="48dp"
         android:text="DM"

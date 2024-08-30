@@ -16,7 +16,8 @@
         app:layout_constraintWidth_percent="0.2"
         android:background="@color/default_app_color_d1">
 
-        <ImageView
+        <ImageButton
+            android:id="@+id/dmButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginBottom="16dp"
@@ -28,35 +29,39 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginTop="10dp"/>
+
     </LinearLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/rightContainer"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/leftContainer"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <fragment
+        <FrameLayout
             android:id="@+id/top_section"
-            android:name="com.example.teamnovapersonalprojectprojecting.ui.home.TopSectionFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/default_app_color_b1"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
 
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/server_item_recyclerview"
+            android:id="@+id/content_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:background="@color/default_app_color_b1"
             app:layout_constraintTop_toBottomOf="@id/top_section"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@color/default_app_color_b1"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

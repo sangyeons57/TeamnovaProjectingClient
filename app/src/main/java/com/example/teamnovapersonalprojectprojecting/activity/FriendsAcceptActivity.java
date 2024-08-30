@@ -1,4 +1,4 @@
-package com.example.teamnovapersonalprojectprojecting;
+package com.example.teamnovapersonalprojectprojecting.activity;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
@@ -93,7 +94,7 @@ public class FriendsAcceptActivity extends AppCompatActivity {
             }
             return false;
         };
-        SocketEventListener.addEvent(SocketEventListener.eType.REMOVE_WAITING, removeWaitingEventListener);
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.REMOVE_WAITING, removeWaitingEventListener);
 
         /*
         TODO: 이부분을 볼때 업데이트 되는 데이터는 요청이 발생하지 않아도
@@ -106,7 +107,7 @@ public class FriendsAcceptActivity extends AppCompatActivity {
             runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
             return false;
         };
-        SocketEventListener.addEvent(SocketEventListener.eType.ADD_WAITING, addWaitingEventListener);
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.ADD_WAITING, addWaitingEventListener);
 
         addFriendOnWaitingEventListener = (jsonUtil)->{
             SocketConnection.LOG(jsonUtil.toString());
@@ -117,15 +118,15 @@ public class FriendsAcceptActivity extends AppCompatActivity {
             runOnUiThread(()-> recyclerView.getAdapter().notifyDataSetChanged());
             return false;
         };
-        SocketEventListener.addEvent(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, addFriendOnWaitingEventListener);
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, addFriendOnWaitingEventListener);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SocketEventListener.removeEvent(SocketEventListener.eType.REMOVE_WAITING, removeWaitingEventListener);
-        SocketEventListener.removeEvent(SocketEventListener.eType.ADD_WAITING, addWaitingEventListener);
-        SocketEventListener.removeEvent(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, addFriendOnWaitingEventListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.REMOVE_WAITING, removeWaitingEventListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.ADD_WAITING, addWaitingEventListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.ADD_FRIEND_ON_WAITING, addFriendOnWaitingEventListener);
     }
 
     public static class DataAdapter extends RecyclerView.Adapter<DataViewHolder> {

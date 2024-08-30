@@ -5,7 +5,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.service.autofill.UserData;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,11 +23,6 @@ import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 import com.example.teamnovapersonalprojectprojecting.util.ServerConnectManager;
 import com.google.android.material.textfield.TextInputEditText;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 
 public class FriendAddDialogFragment extends DialogFragment {
     TextInputEditText searchNameInput;
@@ -63,7 +57,7 @@ public class FriendAddDialogFragment extends DialogFragment {
                         .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
                         .add(JsonUtil.Key.USERNAME, DataManager.Instance().username));
 
-                SocketEventListener.addEvent(SocketEventListener.eType.ADD_WAITING, new SocketEventListener.EventListener() {
+                SocketEventListener.addAddEventQueue(SocketEventListener.eType.ADD_WAITING, new SocketEventListener.EventListener() {
                     @Override
                     public boolean run(JsonUtil jsonUtil) {
                         SocketConnection.LOG(jsonUtil.toString());
@@ -93,7 +87,7 @@ public class FriendAddDialogFragment extends DialogFragment {
                         } else {
                             ServerConnectManager.Log("FriendAddDialogFragment couldn't handle it: " + jsonUtil.toString());
                         }
-                        SocketEventListener.addRemoveQueue(this);
+                        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.ADD_WAITING, this);
 
                         return true;
                     }

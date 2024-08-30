@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class LocalDBChat extends SQLiteOpenHelper {
     public static final String DB_NAME = "Chat.db";
-    public static final int DB_VERSION = 2;
+    public static final int DB_VERSION = 3;
 
     private Map<Class<? extends LocalDBAttribute>, LocalDBAttribute> databaseChatMap;
 
@@ -26,6 +26,10 @@ public class LocalDBChat extends SQLiteOpenHelper {
         }
         return instance;
     }
+    public static void Reset(){
+        instance = null ;
+    }
+
     public static void LOG(String title, int logText){
         Log.d(LocalDBChat.class.getSimpleName(), title +": " + logText);
     }

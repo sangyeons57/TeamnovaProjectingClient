@@ -1,10 +1,10 @@
 package com.example.teamnovapersonalprojectprojecting.chat;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -16,19 +16,31 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.chat.DB_ChatTable;
 import com.example.teamnovapersonalprojectprojecting.local.database.chat.LocalDBChat;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_ChannelList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_DMList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.SendMessage;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
     private static final int pageSize = 20;
+
+    public static final String LAST_CHAT_ID = "lastChatId";
+    public static final String IS_DM = "isDM";
 
     private RecyclerView chatRecyclerView;
     private LinearLayoutManager layoutManager;
@@ -43,6 +55,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private boolean isReadyFirstItem;
     private boolean isAtBottom;
+    private boolean isReadyToLoadMoreData;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,6 +65,7 @@ public class ChatActivity extends AppCompatActivity {
 
         isReadyFirstItem = false;
         isAtBottom = true;
+        isReadyToLoadMoreData = true;
 
         sendButton = findViewById(R.id.sendButton);
         messageEditText = findViewById(R.id.messageEditText);
@@ -64,8 +78,9 @@ public class ChatActivity extends AppCompatActivity {
         layoutManager.setOrientation(RecyclerView.VERTICAL);
         chatRecyclerView.setLayoutManager(layoutManager);
 
+
         chatList = new ArrayList<>();
-        adapter = new ChatAdapter(chatList); // Create your adapter with chat data
+        adapter = new ChatAdapter(chatList, getSupportFragmentManager()); // Create your adapter with chat data
         chatRecyclerView.setAdapter(adapter);
 
         chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -77,42 +92,91 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        SocketEventListener.addEvent(SocketEventListener.eType.GET_LAST_CHAT_ID, new SocketEventListener.EventListener() {
+        chatRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public boolean run(JsonUtil jsonUtil) {
-                int chatId = jsonUtil.getInt(JsonUtil.Key.CHAT_ID, 0);
-                int channelId = DataManager.Instance().channelId;
-                if (chatId == LocalDBChat.GetTable(DB_ChatTable.class).getLastChatId(channelId)){
-                    try ( Cursor cursor = LocalDBChat.GetTable(DB_ChatTable.class).getChatDataRangeFromBack(channelId, pageSize, 0); ) {
-                        while (cursor.moveToNext()){
-                            adapter.addChatMessages(cursor);
-                        }
-                        runOnUiThread(() -> {
-                            chatRecyclerView.scrollToPosition(0);
-                        });
-                    }
-                } else {
-                    LocalDBChat.GetTable(DB_ChatTable.class).addOrUpdateChatByServer(channelId, pageSize, 0);
-                    SocketEventListener.addEvent(SocketEventListener.eType.GET_CHAT_DATA, new SocketEventListener.EventListener(){
-                        @Override
-                        public boolean run(JsonUtil jsonUtil) {
-                            loadMoreData(false, true);
-
-                            SocketEventListener.addRemoveQueue(this);
-                            return false;
-                        }
-                    });
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (isReadyToLoadMoreData && newState == RecyclerView.OVER_SCROLL_ALWAYS && !isAtBottom) {
+                    loadMoreData(true, false);
                 }
-
-                SocketEventListener.addRemoveQueue(this);
-                return false;
             }
         });
-        SocketConnection.sendMessage(new JsonUtil()
-                .add(JsonUtil.Key.TYPE, SocketEventListener.eType.GET_LAST_CHAT_ID)
-                .add(JsonUtil.Key.CHANNEL_ID, DataManager.Instance().channelId));
+        chatRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
 
-        channelNameTextView.setText("channel name");
+                //화면이 올라갈떄 (과거 데이터를 볼떄)
+                if (layoutManager != null && dy < 0) {
+                    int visibleItemCount = layoutManager.getChildCount();
+                    int totalItemCount = layoutManager.getItemCount();
+                    int pastVisibleItems = layoutManager.findFirstVisibleItemPosition();
+
+                    if (isReadyToLoadMoreData && (visibleItemCount + pastVisibleItems) >= totalItemCount) {
+                        Log.d("ChatActivity", "visibleItemCount: " + visibleItemCount + ", totalItemCount: " + totalItemCount + ", pastVisibleItems: " + pastVisibleItems);
+                        // Load more data
+                        loadMoreData(true, false);
+                    }
+                    isAtBottom = false;
+                } else if (layoutManager != null && dy > 0) {
+                    isAtBottom = layoutManager.findFirstVisibleItemPosition() == 0;
+                }
+            }
+        });
+
+        Intent intent = getIntent();
+        int lastChatId = intent.getIntExtra(LAST_CHAT_ID, 0);
+        boolean isDM = intent.getBooleanExtra(IS_DM, true);
+        int channelId = DataManager.Instance().channelId;
+
+        Log.d("ChatActivity", "NewLastChatId: " + lastChatId + " BeforeLastChatId: " + LocalDBChat.GetTable(DB_ChatTable.class).getLastChatId(channelId));
+
+        if (lastChatId > LocalDBChat.GetTable(DB_ChatTable.class).getLastChatId(channelId)){
+            LocalDBChat.GetTable(DB_ChatTable.class).addOrUpdateChatByServer(channelId, pageSize, 0);
+            SocketEventListener.addAddEventQueue(SocketEventListener.eType.GET_CHAT_DATA, new SocketEventListener.EventListenerOnce(SocketEventListener.eType.GET_CHAT_DATA){
+                @Override
+                public boolean runOnce(JsonUtil jsonUtil) {
+                    loadMoreData(false, true);
+                    return false;
+                }
+            });
+        } else {
+            LocalDBChat.GetTable(DB_ChatTable.class).getChatDataRangeFromBack(channelId, pageSize, 0).execute(new CursorReturn.Execute() {
+                @Override
+                public void run(Cursor cursor) {
+                    while (cursor.moveToNext()){
+                        adapter.addChatMessages(cursor);
+                    }
+                    runOnUiThread(() -> { chatRecyclerView.scrollToPosition(0); });
+                }
+            });
+        }
+
+
+        if(isDM){
+            LocalDBMain.GetTable(DB_ChannelList.class).addChanelListByServer(DataManager.Instance().channelId);
+            SocketEventListener.addAddEventQueue(SocketEventListener.eType.GET_CHANNEL_DATA, new SocketEventListener.EventListener(){
+                @Override
+                public boolean run(JsonUtil jsonUtil) {
+                    int otherId = LocalDBMain.GetTable(DB_DMList.class).getOtherId(DataManager.Instance().channelId);
+                    String title = LocalDBMain.GetTable(DB_UserList.class).getUsername(otherId);
+
+                    DataManager.Instance().mainHandler.post(()-> channelNameTextView.setText(title));
+
+                    SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.GET_CHAT_DATA, this);
+                    return false;
+                }
+            });
+        } else {
+            LocalDBMain.GetTable(DB_ChannelList.class).addChanelListByServer(DataManager.Instance().channelId);
+            SocketEventListener.addAddEventQueue(SocketEventListener.eType.GET_CHANNEL_DATA, new SocketEventListener.EventListenerOnce(SocketEventListener.eType.GET_CHANNEL_PROJECT){
+                @Override
+                public boolean runOnce(JsonUtil jsonUtil) {
+                    channelNameTextView.setText(jsonUtil.getString(JsonUtil.Key.CHANNEL_NAME, DataManager.NOT_SETUP_S));
+                    return false;
+                }
+            });
+        }
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,8 +201,7 @@ public class ChatActivity extends AppCompatActivity {
                                 .add(JsonUtil.Key.TYPE, SocketEventListener.eType.SEND_MESSAGE)
                                 .add(JsonUtil.Key.MESSAGE, messageEditText.getText().toString())
                                 .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
-                                .add(JsonUtil.Key.USERNAME, DataManager.Instance().username)
-                                .add(JsonUtil.Key.IS_DM, true));
+                                .add(JsonUtil.Key.USERNAME, DataManager.Instance().username));
 
                 messageEditText.setText("");
                 messageEditText.clearFocus();
@@ -185,41 +248,18 @@ public class ChatActivity extends AppCompatActivity {
             }
             return false;
         };
-        SocketEventListener.addEvent(SocketEventListener.eType.SEND_MESSAGE, eventListener);
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.SEND_MESSAGE, eventListener);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        chatRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                //화면이 올라갈떄 (과거 데이터를 볼떄)
-                if (layoutManager != null && dy < 0) {
-                    int visibleItemCount = layoutManager.getChildCount();
-                    int totalItemCount = layoutManager.getItemCount();
-                    int pastVisibleItems = layoutManager.findFirstVisibleItemPosition();
-
-                    if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
-                        Log.d("ChatActivity", "visibleItemCount: " + visibleItemCount + ", totalItemCount: " + totalItemCount + ", pastVisibleItems: " + pastVisibleItems);
-                        // Load more data
-                        loadMoreData(true, false);
-                    }
-                    isAtBottom = false;
-                } else if (layoutManager != null && dy > 0) {
-                    isAtBottom = layoutManager.findFirstVisibleItemPosition() == 0;
-                }
-            }
-        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SocketEventListener.removeEvent(SocketEventListener.eType.SEND_MESSAGE, eventListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.SEND_MESSAGE, eventListener);
         DataManager.Instance().channelId = DataManager.NOT_SETUP_I;
 
         SocketConnection.sendMessage(new JsonUtil()
@@ -228,26 +268,39 @@ public class ChatActivity extends AppCompatActivity {
     private void loadMoreData(boolean isNotifyData, boolean isScrollToBottom){
         int channelId = DataManager.Instance().channelId;
         int offset = chatList.size();
-        int limit = chatList.size() % pageSize == 0 ? pageSize : chatList.size() % pageSize;
+        int limit = chatList.size() % pageSize == 0 ? pageSize :  pageSize - chatList.size() % pageSize;
         Log.d("ChatActivity", "limit: " + limit + ", offset: " + offset);
 
-        try ( Cursor cursor = LocalDBChat.GetTable(DB_ChatTable.class).getChatDataRangeFromBack(channelId, limit, offset); ){
-            if (cursor.moveToFirst()) {
-                do{
-                    adapter.addChatMessages(cursor);
-                } while (cursor.moveToNext());
-                chatRecyclerView.post(()->{
-                    if(isNotifyData) {
-                        adapter.notifyItemRangeInserted(offset, limit);
-                    }
-                    if(isScrollToBottom){
-                        chatRecyclerView.scrollToPosition(0);
-                    }
-                });
-                isReadyFirstItem = true;
-            } else {
-                LocalDBChat.GetTable(DB_ChatTable.class).addOrUpdateChatByServer(channelId, limit, offset);
+        LocalDBChat.GetTable(DB_ChatTable.class).getChatDataRangeFromBack(channelId, limit, offset).execute(new CursorReturn.Execute() {
+            @Override
+            public void run(Cursor cursor) {
+                if (cursor.moveToFirst()) {
+                    do{
+                        adapter.addChatMessages(cursor);
+                    } while (cursor.moveToNext());
+                    chatRecyclerView.post(()->{
+                        if(isNotifyData) {
+                            adapter.notifyItemRangeInserted(offset, cursor.getCount());
+                        }
+                        if(isScrollToBottom){
+                            chatRecyclerView.scrollToPosition(0);
+                        }
+                    });
+                    isReadyFirstItem = true;
+                } else {
+                    isReadyToLoadMoreData = false;
+                    LocalDBChat.GetTable(DB_ChatTable.class).addOrUpdateChatByServer(channelId, limit, offset);
+                    SocketEventListener.addAddEventQueue(SocketEventListener.eType.GET_CHAT_DATA, new SocketEventListener.EventListener(){
+                        @Override
+                        public boolean run(JsonUtil jsonUtil) {
+                            JSONArray data = jsonUtil.getJsonArray(JsonUtil.Key.DATA, new JSONArray());
+                            if( data.length() != 0 ) { isReadyToLoadMoreData = true; }
+                            SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.GET_CHAT_DATA, this);
+                            return false;
+                        }
+                    });
+                }
             }
-        }
+        });
     }
 }

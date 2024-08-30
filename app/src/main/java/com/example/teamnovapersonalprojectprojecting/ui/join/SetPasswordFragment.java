@@ -11,7 +11,7 @@ import android.widget.CheckBox;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.teamnovapersonalprojectprojecting.JoinActivity;
+import com.example.teamnovapersonalprojectprojecting.activity.JoinActivity;
 import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.util.StringCheck;
 import com.google.android.material.textfield.TextInputEditText;

@@ -6,139 +6,271 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_DMList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_Project;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_ProjectStructure;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
+import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetProjectData;
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
+import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
+import com.example.teamnovapersonalprojectprojecting.util.Retry;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
-
-    private RecyclerView serverItemRecyclerView;
-    private ProjectAdapter projectMyAdapter;
-    private List<ProjectAdapter.MyItem> projectItemList;
+    private ImageButton dmButton;
+    private RecyclerView contentRecyclerview;
 
     private DMAdapter dmAdapterMyAdapter;
+    private ProjectAdapter projectAdapter;
 
     private RecyclerView serverListRecyclerView;
-    private ServerListAdapter serverListAdapter;
-    private List<ServerListAdapter.MyItem> serverListItemList;
+    private ProjectListAdapter projectListAdapter;
+    private List<ProjectListAdapter.MyItem> projectListItemList;
 
-    private SocketEventListener.EventListener eventListener;
+    private SocketEventListener.EventListener reloadDmListListener;
+    private SocketEventListener.EventListener reloadProjectListListener;
+    private SocketEventListener.EventListener displayProjectEventListener;
+    private SocketEventListener.EventListener getProjectDataEventListener;
 
-    List<DMAdapter.DataModel> dmList;
+    private FragmentManager fragmentManager;
 
-    public static boolean isSelectedDMPage;
 
     private View view;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        isSelectedDMPage = true;
-        dmList = new ArrayList<>();
-
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.top_section, new TopSectionFragment());
-        transaction.commit();
+        projectListItemList = new ArrayList<>();
+        projectListAdapter = new ProjectListAdapter(projectListItemList);
 
-        eventListener = (jsonUtil)-> {
-            setDMAdapterItemList();
+
+        dmButton = view.findViewById(R.id.dmButton);
+        contentRecyclerview = view.findViewById(R.id.content_recyclerview);
+        contentRecyclerview.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        contentRecyclerview.setAdapter(setDMAdapterItemList());
+
+        serverListRecyclerView = view.findViewById(R.id.server_list_recyclerview);
+        serverListRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        serverListRecyclerView.setAdapter(projectListAdapter);
+
+        fragmentManager = getChildFragmentManager();
+
+        if(DataManager.Instance().userId != DataManager.NOT_SETUP_I){
+            setHomeServerList(view);
+            setHomeContentDM(view);
+        }
+
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.JOIN_PROJECT, (j)->{
+            setHomeServerList(view);
+            return false;
+        });
+
+        dmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setHomeContentDM(v);
+            }
+        });
+
+
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.DISPLAY_PROJECT_ELEMENT, displayProjectEventListener = (jsonUtil)-> {
+            SocketEventListener.eType type = SocketEventListener.eType.toType(jsonUtil.getString(JsonUtil.Key.TYPE, ""));
+            SocketConnection.LOG(type.toString());
+            if (!type.equals(SocketEventListener.eType._RELOAD)) {
+                DataManager.Instance().projectId = jsonUtil.getInt(JsonUtil.Key.PROJECT_ID, 0);
+                DataManager.Instance().projectName = jsonUtil.getString(JsonUtil.Key.PROJECT_NAME, "");
+                setHomeContentProject(view);
+            }
+
+            DataManager.Instance().mainHandler.post(()->projectAdapter.notifyDataSetChanged());
+
+            return false;
+        });
+
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.GET_PROJECT_DATA, getProjectDataEventListener = (j)->{
+            SocketEventListener.callEvent(SocketEventListener.eType.DISPLAY_PROJECT_ELEMENT, new JsonUtil()
+                    .add(JsonUtil.Key.PROJECT_ID, DataManager.Instance().projectId)
+                    .add(JsonUtil.Key.PROJECT_NAME, DataManager.Instance().projectName));
+            return false;
+        });
+
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.RELOAD_DM_LIST, reloadDmListListener = (j) -> {
+            DataManager.Instance().mainHandler.post(()-> setDMAdapterItemList().notifyDataSetChanged() );
+            return false;
+        });
+
+        reloadProjectListListener = (j)->{
+            Log.d("ReloadProjectListListener", "reloadProjectListListener");
+            DataManager.Instance().mainHandler.post(()-> projectAdapter.notifyDataSetChanged());
             return false;
         };
-        SocketEventListener.addEvent(SocketEventListener.eType.RELOAD_DM_LIST, eventListener);
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.EDIT_CATEGORY_NAME, reloadProjectListListener );
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.CREATE_CHANNEL, reloadProjectListListener);
+
+
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        setHomeContent(view);
-        setHomeServerList(view);
+        if(DataManager.Instance().projectId != DataManager.NOT_SETUP_I){
+        }
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        SocketEventListener.removeEvent(SocketEventListener.eType.RELOAD_DM_LIST, eventListener);
+    public void onDestroy() {
+        super.onDestroy();
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.RELOAD_DM_LIST, reloadDmListListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.EDIT_CATEGORY_NAME, reloadProjectListListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.CREATE_CHANNEL, reloadProjectListListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.DISPLAY_PROJECT_ELEMENT, displayProjectEventListener);
+        SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.GET_PROJECT_DATA, getProjectDataEventListener);
     }
 
     private void setHomeServerList(View view) {
-        serverListRecyclerView = view.findViewById(R.id.server_list_recyclerview);
-        serverListRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
 
-        serverListItemList = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            serverListItemList.add(new ServerListAdapter.MyItem(R.drawable.day_background));
-        }
-        serverListItemList.add(new ServerListAdapter.MyItem(R.drawable.ic_add));
+        new Retry(()->{
+            try{
+                LocalDBMain.GetTable(DB_Project.class)
+                        .getDefaultDataCursor()
+                        .execute(this::displayDataFromLocalDB);
+                return true;
+            } catch (IllegalStateException e){
+                e.printStackTrace();
+                return false;
+            }
+        }).setMaxRetries(5).setRetryInterval(0).execute();
 
-        serverListAdapter = new ServerListAdapter(serverListItemList);
-        serverListRecyclerView.setAdapter(serverListAdapter);
+        SocketConnection.sendMessage(new JsonUtil()
+                .add(JsonUtil.Key.TYPE, SocketEventListener.eType.GET_ALL_PROJECT_USER_INCLUDED)
+                .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId));
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.GET_ALL_PROJECT_USER_INCLUDED, new SocketEventListener.EventListenerOnce(SocketEventListener.eType.GET_ALL_PROJECT_USER_INCLUDED){
+            @Override
+            public boolean runOnce(JsonUtil jsonUtil) {
+                LocalDBMain.GetTable(DB_Project.class)
+                        .getDefaultDataCursor()
+                        .execute(this::display);
+                return false;
+            }
+
+            private void display(Cursor cursor) {
+                projectListItemList.clear();
+                while (cursor.moveToNext()){
+                    cursor.getInt(1);
+                    projectListItemList.add( new ProjectListAdapter.MyItem(
+                            cursor.getInt(0),
+                            cursor.getString(1),
+                            R.drawable.day_background
+                    ));
+                }
+                projectListItemList.add(new ProjectListAdapter.MyItem( 0, "", R.drawable.ic_add ));
+                DataManager.Instance().mainHandler.post(projectListAdapter::notifyDataSetChanged);
+            }
+        });
     }
 
-    private void setHomeContent(View view){
-        serverItemRecyclerView = view.findViewById(R.id.server_item_recyclerview);
-        serverItemRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-
-        if(isSelectedDMPage){
-            Log.d("HomeFragment", "setHomeContent: DM");
-            serverItemRecyclerView.setAdapter(setDMAdapterItemList());
-        } else {
-            serverItemRecyclerView.setAdapter(setProjectItemList());
+    private void displayDataFromLocalDB(Cursor cursor){
+        projectListItemList.clear();
+        while (cursor.moveToNext()){
+            cursor.getInt(1);
+            projectListItemList.add( new ProjectListAdapter.MyItem(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    R.drawable.day_background
+            ));
         }
+        projectListItemList.add(new ProjectListAdapter.MyItem( 0, "", R.drawable.ic_add ));
+        DataManager.Instance().mainHandler.post(projectListAdapter::notifyDataSetChanged);
+    }
 
+    public void setHomeContentProject(View view){
+        //retry 페턴 적용 필요 해당 util이나 기능 만들면될듯
+        DataManager.Instance().mainHandler.post(()->{
+            fragmentManager.beginTransaction()
+                    .replace( R.id.top_section, new TopSectionProject())
+                    .commitAllowingStateLoss();
+
+            contentRecyclerview.setAdapter(setProjectItemList());
+        });
+    }
+
+    private void setHomeContentDM(View view){
+        //retry 페턴 적용 필요 해당 util이나 기능 만들면될듯
+        fragmentManager.beginTransaction()
+                .replace( R.id.top_section, new TopSectionDM())
+                .commitAllowingStateLoss();
+        contentRecyclerview.setAdapter(setDMAdapterItemList());
     }
 
     private DMAdapter setDMAdapterItemList(){
-        dmList.clear();
-        int i = 0;
-        try(Cursor cursor = LocalDBMain.GetTable(DB_DMList.class).getAllOrderByLastTime()){
-            LocalDBMain.LOG(cursor.getCount());
-            while (cursor.moveToNext()){
-                i++;
 
-                int channelId = cursor.getInt(0);
-                int otherId = cursor.getInt(1);
-                String lastTime = cursor.getString(2);
-                String otherUsername = cursor.getString(3);
-                LocalDBMain.LOG(i + " " + channelId + " " + otherId + " " + lastTime + " " + otherUsername + " ");
+        //여기 계속해서 hasBeenCloased 에러 발생함
+        new Retry(() ->{
+            try {
+                LocalDBMain.GetTable(DB_DMList.class).getAllOrderByLastTime().execute(new CursorReturn.Execute() {
+                    int i = 0;
+                    @Override
+                    public void run(Cursor cursor) {
+                        DataManager.Instance().dmItemList.clear();
+                        while (cursor.moveToNext()){
+                            ++i;
 
-                dmList.add(new DMAdapter.DataModel(otherId, channelId));
+                            int channelId = cursor.getInt(0);
+                            int otherId = cursor.getInt(1);
+                            String lastTime = cursor.getString(2);
+                            String otherUsername = cursor.getString(3);
+                            LocalDBMain.LOG(i + " " + channelId + " " + otherId + " " + lastTime + " " + otherUsername + " ");
+
+                            DataManager.Instance().dmItemList
+                                    .add(new DMAdapter.DataModel(otherUsername, channelId));
+                        }
+                    }
+                });
+                return true;
+            } catch (IllegalStateException e){
+                e.printStackTrace();
+                return false;
             }
-        }
+        }).setMaxRetries(5).setRetryInterval(0).execute();
 
         if (dmAdapterMyAdapter == null) {
-            dmAdapterMyAdapter = new DMAdapter(dmList);
-        } else {
-            getActivity().runOnUiThread(() -> {
-                dmAdapterMyAdapter.notifyDataSetChanged();
-            });
+            dmAdapterMyAdapter = new DMAdapter(DataManager.Instance().dmItemList);
         }
         return dmAdapterMyAdapter;
     }
 
     private ProjectAdapter setProjectItemList(){
-        projectItemList = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            List<String> contentList = new ArrayList<>();
-            for (int j = 1; j <= i; j++){
-                contentList.add("체널 " + j);
+        new Retry(()->{
+            try {
+                JSONObject structure = LocalDBMain.GetTable(DB_ProjectStructure.class).getStructureById(DataManager.Instance().projectId);
+                Log.d("1234",structure.toString());
+                DataManager.Instance().projectItemList = GetProjectData.getProjectItemListFromStructure(structure);
+                projectAdapter = new ProjectAdapter(DataManager.Instance().projectItemList, getParentFragmentManager());
+                return true;
+            } catch (IllegalStateException e){
+                e.printStackTrace();
             }
-            projectItemList.add(new ProjectAdapter.MyItem("카테고리 " + i, contentList ));
-        }
-        return projectMyAdapter = new ProjectAdapter(projectItemList);
+            return false;
+        }).setMaxRetries(5).setRetryInterval(0).execute();;
+
+        return projectAdapter;
     }
 }

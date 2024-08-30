@@ -26,6 +26,7 @@ public class ReloadDMList implements SocketEventListener.EventListener {
                 LocalDBMain.GetTable(DB_UserList.class).addUserByServer(otherId, null);
                 LocalDBMain.GetTable(DB_DMList.class).addDMList(channelId, otherId, lastTime);
 
+                SocketEventListener.LOG("ReloadDMList" ,channelId + " " + otherId + " " + otherUsername + " " + lastTime);
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }

@@ -1,4 +1,4 @@
-package com.example.teamnovapersonalprojectprojecting;
+package com.example.teamnovapersonalprojectprojecting.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.ui.profile.setting.ChangeNameDialogFragment;
 import com.example.teamnovapersonalprojectprojecting.ui.profile.setting.ChangePasswordActivity;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;

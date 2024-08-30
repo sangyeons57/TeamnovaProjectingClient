@@ -1,5 +1,6 @@
 package com.example.teamnovapersonalprojectprojecting.local.database;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public abstract class LocalDBAttribute {
@@ -10,3 +11,4 @@ public abstract class LocalDBAttribute {
     public abstract String getCreateQuery();
     public abstract String getTableName();
 }
+
