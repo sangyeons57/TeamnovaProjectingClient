@@ -13,7 +13,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:src="@drawable/ic_account_black_24dp"
-        app:tint="@color/gray"/>
+        />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"

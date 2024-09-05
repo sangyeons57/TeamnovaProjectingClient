@@ -19,7 +19,8 @@ public class GetAllProjectUserIncluded implements SocketEventListener.EventListe
                 JSONObject defaultData = jsonArray.getJSONObject(i);
                 int projectId = defaultData.getInt("ProjectId");
                 String projectName = defaultData.getString("ProjectName");
-                LocalDBMain.GetTable(DB_Project.class).insertOrReplaceData(projectId, projectName, DataManager.NOT_SETUP_S);
+                int profileImageId = defaultData.getInt("ProjectProfileImage");
+                LocalDBMain.GetTable(DB_Project.class).insertOrReplaceData(projectId, projectName, profileImageId);
             }
         } catch (JSONException e) {
             throw new RuntimeException(e);

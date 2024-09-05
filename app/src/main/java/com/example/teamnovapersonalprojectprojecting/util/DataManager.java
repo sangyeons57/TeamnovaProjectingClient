@@ -9,6 +9,7 @@ import android.os.Handler;
 import com.example.teamnovapersonalprojectprojecting.activity.LoginActivity;
 import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.chat.LocalDBChat;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FileList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
@@ -43,12 +44,15 @@ public class DataManager {
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String URL_PATTERN = "(https?|ftp):\\/\\/([^\\s\\/?\\.#]+\\.?)+(\\/[^\\s]*)?";
     public static final String URL_INVITE_PATTERN = "https?:\\/\\/" + SocketConnection.SERVER_ADDRESS + "\\/invite\\?token=\\w+";
+    public static final Integer PERMISSION_READ_EXTERNAL_STORAGE = 101;
 
+    public boolean checkPingPong;
 
     public String username;
     public int userId = NOT_SETUP_I;
     public int channelId = NOT_SETUP_I;
     public int projectId = NOT_SETUP_I;
+    public String profilePath = NOT_SETUP_S;
     public String projectName = NOT_SETUP_S;
     public String stringUserId(){
         return String.valueOf(userId);
@@ -118,8 +122,10 @@ public class DataManager {
     }
 
     public static UserData getUserData(int userId){
-        if( Instance().userDataMap.get(userId) == null ){
-            instance.userDataMap.put(userId, new UserData(userId));
+        if(Instance().userDataMap.containsKey(userId)) {
+            return Instance().userDataMap.get(userId);
+        } else {
+            UserData userData = new UserData(userId);
 
             new Retry(()->{
                 try {
@@ -127,14 +133,12 @@ public class DataManager {
                         @Override
                         public void run(Cursor cursor) {
                             if(cursor.moveToFirst()) {
-                                instance.userDataMap.get(userId).username = cursor.getString(DB_UserList.username);
+                                userData.username = cursor.getString(DB_UserList.username);
+                                int imageId = cursor.getInt(DB_UserList.profileImageId);
+                                if(imageId != DataManager.NOT_SETUP_I) {
+                                    checkAndSetProfileImage(userData, imageId);
+                                }
                             }
-                        }
-
-                        public void whenCursorNull() {
-                            LocalDBMain.GetTable(DB_UserList.class).addUserByServer(userId, (jsonUtil)->{
-                                instance.userDataMap.get(userId).username = jsonUtil.getString(JsonUtil.Key.USERNAME, "");
-                            });
                         }
                     });
                     return true;
@@ -143,9 +147,31 @@ public class DataManager {
                     return false;
                 }
             }).setMaxRetries(5).execute();
+            Instance().userDataMap.put(userId, userData);
+            return userData;
         }
+    }
+    public static UserData reloadUserData(int userId){
+        Instance().userDataMap.remove(userId);
+        return getUserData(userId);
+    }
 
-        return Instance().userDataMap.get(userId);
+    private static void checkAndSetProfileImage(UserData userData, int imageId){
+        if(LocalDBMain.GetTable(DB_FileList.class).checkFileExistAndCall(imageId)){
+            LocalDBMain.GetTable(DB_FileList.class).getFileData(imageId).execute((cursor1)->{
+                if(cursor1.moveToFirst()){
+                    userData.profileImagePath = cursor1.getString(3);
+                }
+            });
+        } else {
+            SocketEventListener.addAddEventQueue(SocketEventListener.eType.FILE_INPUT_STREAM,new SocketEventListener.EventListenerOnce(SocketEventListener.eType.FILE_INPUT_STREAM){
+                @Override
+                public boolean runOnce(JsonUtil jsonUtil) {
+                    userData.profileImagePath = jsonUtil.getString(JsonUtil.Key.DATA, "");
+                    return false;
+                }
+            });
+        }
     }
 
     public static List<String> JsonArrayToStringList(JSONArray jsonArray) throws JSONException {

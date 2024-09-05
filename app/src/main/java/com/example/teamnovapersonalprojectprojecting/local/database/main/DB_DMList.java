@@ -40,7 +40,8 @@ public class DB_DMList extends LocalDBAttribute {
         String query = "SELECT mainTable.channelId AS channelId, " +
                 "mainTable.otherId AS otherId, " +
                 "mainTable.lastTime AS lastTime, " +
-                "userListTable.username AS otherUsername " +
+                "userListTable.username AS otherUsername, " +
+                "userListTable.profileImageId AS profileImageId " +
                 "FROM " + getTableName() + " AS mainTable " +
                 "LEFT JOIN " + LocalDBMain.GetTable(DB_UserList.class).getTableName() + " AS userListTable " +
                 "ON mainTable.otherId = userListTable.id " +

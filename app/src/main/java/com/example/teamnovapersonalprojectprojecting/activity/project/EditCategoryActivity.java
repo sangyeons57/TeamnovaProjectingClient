@@ -36,6 +36,7 @@ public class EditCategoryActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project_edit_category);
+        DataManager.Instance().currentContext = this;
 
         categoryNameEditText = findViewById(R.id.categoryNameEditText);
         warningTextView = findViewById(R.id.warningTextView);
@@ -53,6 +54,11 @@ public class EditCategoryActivity extends AppCompatActivity {
         saveCategoryButton.setOnClickListener(this::onClickSaveCategoryButton);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
     public void onClickDeleteCategoryButton(View view){
         finish();
         LocalDBMain.GetTable(DB_ProjectStructure.class).removeCategory(projectId, categoryId);

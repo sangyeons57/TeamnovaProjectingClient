@@ -31,6 +31,7 @@ public class AddCategoryActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project_create_category);
+        DataManager.Instance().currentContext = this;
         intent = getIntent();
 
         if(DataManager.Instance().projectId == DataManager.NOT_SETUP_I){
@@ -44,6 +45,13 @@ public class AddCategoryActivity extends AppCompatActivity {
 
         createCategoryButton.setOnClickListener(this::createCategory);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
+
 
     public void createCategory(View view) {
         categoryName = categoryNameEditText.getText().toString().trim();

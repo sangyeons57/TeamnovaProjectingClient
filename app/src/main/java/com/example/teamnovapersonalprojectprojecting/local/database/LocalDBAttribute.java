@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public abstract class LocalDBAttribute {
-    protected SQLiteOpenHelper sqlite;
+    public SQLiteOpenHelper sqlite;
     public LocalDBAttribute(SQLiteOpenHelper sqlite){
         this.sqlite = sqlite;
     }

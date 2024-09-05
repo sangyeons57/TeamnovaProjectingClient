@@ -15,6 +15,9 @@ import java.io.Serializable;
 public class JsonUtil {
     public enum Key {
         NONE("NONE"),
+        ERROR("ERROR"),
+        ERROR_MESSAGE("ERROR_MESSAGE"),
+        ERROR_STACKTRACE("ERROR_STACKTRACE"),
         MESSAGE("message"),
         MEMBERS("members"),
         STATUS("status"),
@@ -22,6 +25,7 @@ public class JsonUtil {
         ID("id"),
         CHAT_ID ("chatId"),
         USER_ID("userId"),
+        PROFILE_ID("profileId"),
         USER_ID1("userId1"),
         USER_ID2("userId2"),
         OTHER_ID("otherId"),
@@ -34,6 +38,7 @@ public class JsonUtil {
         DATETIME("datetime"),
         DATA("data"),
         IS_SELF("isSelf"),
+        IS_EXIST("isExist"),
         IS_DM("isDM"),
         IS_MODIFIED("isModified"),
         IS_PRIVATE("isPrivate"),
@@ -199,5 +204,9 @@ public class JsonUtil {
         } catch (JSONException e) {
             return defaultValue;
         }
+    }
+
+    public boolean has(Key key) {
+        return jsonObject.has(key.keyName);
     }
 }

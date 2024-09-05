@@ -2,6 +2,8 @@ package com.example.teamnovapersonalprojectprojecting.ui.home;
 
 import android.app.Activity;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,18 +11,24 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FileList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
+import com.example.teamnovapersonalprojectprojecting.util.Retry;
+import com.example.teamnovapersonalprojectprojecting.util.UserData;
 
+import java.io.File;
 import java.util.List;
 
 public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
@@ -49,10 +57,24 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
             });
         }
 
-        public void setData(DataModel dataModel){
+        public void setData(DataModel dataModel) {
             channelId = dataModel.getChannelId();
             textView.setText(dataModel.getName());
             userId = dataModel.getUserId();
+            new Retry(()->{
+                try {
+                    UserData userData = DataManager.getUserData(userId);
+                    if(userData != null && userData.profileImagePath != null && !userData.profileImagePath.isEmpty()){
+                        DB_FileList.setFileImage(imageView, userData.profileImagePath);
+                    } else {
+                        imageView.setImageResource(R.drawable.ic_account_black_24dp);
+                    }
+                } catch (IllegalStateException e){
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }).setMaxRetries(5).execute();
         }
     }
     public DMAdapter(List<DataModel> itemList){
@@ -81,15 +103,17 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
         private int userId;
         private int channelId;
         private String name;
-        public DataModel(String name, int channelId ) {
+        private int profileImageId;
+        public DataModel(String name, int channelId, int profileImageId) {
             this.name = name;
             this.channelId = channelId;
+            this.profileImageId = profileImageId;
         }
 
         // Getters
         public int getUserId() { return userId; }
         public int getChannelId() { return channelId; }
         public String getName(){ return name; }
+        public int getProfileImageId() { return profileImageId; }
     }
-
 }

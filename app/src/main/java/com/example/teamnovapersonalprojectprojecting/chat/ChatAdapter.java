@@ -3,8 +3,6 @@ package com.example.teamnovapersonalprojectprojecting.chat;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.service.autofill.FieldClassification;
-import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -21,12 +19,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.teamnovapersonalprojectprojecting.R;
-import com.example.teamnovapersonalprojectprojecting.activity.project.EditChannelDialogFragment;
 import com.example.teamnovapersonalprojectprojecting.activity.project.ProjectJoinDialogFragment;
-import com.example.teamnovapersonalprojectprojecting.local.database.chat.LocalDBChat;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FileList;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
-import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 import com.example.teamnovapersonalprojectprojecting.util.UserData;
 
 import java.util.HashMap;
@@ -126,7 +122,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                 lastTime,
                 isModified
                 );
-        SocketConnection.LOG(id + " " + chatId + " " + writerId + " " + data + " " + lastTime + " " + isModified);
         addChat(chatItem);
     }
 
@@ -169,12 +164,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     @Override
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
         ChatItem chatItem = chatList.get(position);
-        UserData userData = DataManager.getUserData(chatItem.userId);
 
         holder.profileImageView.setImageResource(R.drawable.ic_account_black_24dp);
-        holder.nameTextView.setText(userData.username);
         holder.messageTextView.setText(chatItem.message);
         holder.dateTextView.setText(chatItem.dateTime);
+
+        UserData userData = DataManager.getUserData(chatItem.userId);
+        if(userData.profileImagePath != null && !userData.profileImagePath.isEmpty()) {
+            DB_FileList.setFileImage(holder.profileImageView, userData.profileImagePath);
+        }
+        holder.nameTextView.setText(userData.username);
 
 
         setClickableUrl(holder.messageTextView, chatItem.message);

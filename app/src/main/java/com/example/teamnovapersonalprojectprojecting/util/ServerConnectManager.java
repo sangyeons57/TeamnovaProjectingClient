@@ -7,6 +7,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,9 +29,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ServerConnectManager {
-    public static final String IP = "43-203-247-194";
-    public static final String REGION = ".ap-northeast-2";
-    public static final String BASE_URL = "http://ec2-" + IP + REGION + ".compute.amazonaws.com/";
+    public static final String BASE_URL = "http://" + SocketConnection.SERVER_ADDRESS + "/";
 
     private String path;
     private FormBody formBody;

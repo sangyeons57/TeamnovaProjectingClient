@@ -122,6 +122,11 @@ public class FriendsAcceptActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.REMOVE_WAITING, removeWaitingEventListener);

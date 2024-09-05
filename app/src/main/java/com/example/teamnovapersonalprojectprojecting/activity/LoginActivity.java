@@ -17,6 +17,7 @@ import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FriendList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
+import com.example.teamnovapersonalprojectprojecting.socket.FileSocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
@@ -105,6 +106,12 @@ public class LoginActivity extends AppCompatActivity {
         tryAutoLogin();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
+
     private boolean isValidEmail(String email){
         if(email == null || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Log.d("LoginActivity", "invalidEmail");
@@ -170,9 +177,9 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("JoinActivity", ""+userId);
                     DataManager.Instance().userId = userId;
                     DataManager.Instance().username = username;
+                    DataManager.Instance().profilePath = LocalDBMain.GetTable(DB_UserList.class).getProfileImagePath(DataManager.Instance().userId);
 
-
-                    SocketConnection.sendMessage(new JsonUtil()
+                    SocketConnection.sendMessage(false, new JsonUtil()
                             .add(JsonUtil.Key.TYPE, SocketEventListener.eType.SET_USER.toString())
                             .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId));
                     SocketEventListener.addAddEventQueue(SocketEventListener.eType.SET_USER, new SocketEventListener.EventListener() {
@@ -186,6 +193,9 @@ public class LoginActivity extends AppCompatActivity {
 
                             //DM리스트 가지고 오기
                             SocketConnection.sendMessage(new JsonUtil().add(JsonUtil.Key.TYPE, SocketEventListener.eType.RELOAD_DM_LIST.toString()));
+
+                            //userId설정후에 FileSOckConnetion연결
+                            FileSocketConnection.Instance();
 
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();

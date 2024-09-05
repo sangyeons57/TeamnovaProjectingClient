@@ -33,8 +33,8 @@
         android:textSize="18sp"/>
 
     <Button
-        android:id="@+id/dmButton"
-        android:layout_width="60dp"
+        android:id="@+id/friendButton"
+        android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:text="DM"
         android:textColor="@color/white"

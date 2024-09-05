@@ -18,7 +18,6 @@ public class AddProjectActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_project);
-
         DataManager.Instance().currentContext = this;
 
         joinNewProjectButton = findViewById(R.id.project_join_button);
@@ -40,4 +39,10 @@ public class AddProjectActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
+
 }

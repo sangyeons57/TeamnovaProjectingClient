@@ -8,9 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.LocalDBAttribute;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 /**
  * 여기 코드 겹치는 부분히 상당히 많은데 어떤 식으로 정리해야할지 생각해봐야할것 같음
  */
@@ -28,36 +25,46 @@ public class DB_Project extends LocalDBAttribute {
         }
     }
 
-    public void updateProfileImageById(int id, String profileImage) {
+    public void updateProfileImageById(int id, int profileImageId) {
         try( SQLiteDatabase db = this.sqlite.getWritableDatabase(); ){
             ContentValues values = new ContentValues();
-            values.put("profileImage", profileImage);
+            values.put("profileImageId", profileImageId);
             db.update(getTableName(), values, "id = ?", new String[]{String.valueOf(id)});
         }
     }
 
 
-    public void insertData(int id, String name, String profileImage) {
+    public void insertData(int id, String name, int profileImageId) {
         try ( SQLiteDatabase db = this.sqlite.getWritableDatabase(); ){
 
             ContentValues values = new ContentValues();
             values.put("id", id);
             values.put("name", name);
-            values.put("profileImage", profileImage);
+            values.put("profileImageId", profileImageId);
 
             db.insert(getTableName(), null, values);
         }
     }
 
-    public void insertOrReplaceData(int id, String name, String profileImage) {
+    public void insertOrReplaceData(int id, String name, int profileImageId) {
         try (SQLiteDatabase db = this.sqlite.getWritableDatabase()) {
 
             ContentValues values = new ContentValues();
             values.put("id", id);
             values.put("name", name);
-            values.put("profileImage", profileImage);
+            values.put("profileImageId", profileImageId);
 
             db.replace(getTableName(), null, values);
+        }
+    }
+
+    public boolean updateProfileImageId(int profileImageId, int projectId) {
+        try (SQLiteDatabase db = this.sqlite.getWritableDatabase()) {
+
+            ContentValues values = new ContentValues();
+            values.put("profileImageId", profileImageId);
+
+            return db.update(getTableName(), values, "id = ?", new String[]{ String.valueOf(projectId) }) > 0;
         }
     }
 
@@ -71,9 +78,15 @@ public class DB_Project extends LocalDBAttribute {
     }
 
     public CursorReturn getDefaultDataCursor() {
-        String query = "SELECT id, name, profileImage FROM " + getTableName();
+        String query = "SELECT id, name, profileImageId FROM " + getTableName();
         SQLiteDatabase db = this.sqlite.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, new String[]{});
+        return new CursorReturn(cursor, db);
+    }
+    public CursorReturn getDefaultDataCursorById(int id){
+        String query = "SELECT id, name, profileImageId FROM " + getTableName() + " WHERE id = ?";
+        SQLiteDatabase db = this.sqlite.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
         return new CursorReturn(cursor, db);
     }
 
@@ -83,7 +96,7 @@ public class DB_Project extends LocalDBAttribute {
         return "CREATE TABLE " + getTableName() +
                 " (`id` INT PRIMARY KEY NOT NULL UNIQUE," +
                 "  `name` TEXT NOT NULL," +
-                "  `profileImage` TEXT NOT NULL);";
+                "  `profileImageId` INT NOT NULL);";
     }
 
     @Override

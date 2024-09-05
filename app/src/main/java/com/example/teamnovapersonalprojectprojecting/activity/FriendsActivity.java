@@ -82,6 +82,11 @@ public class FriendsActivity extends AppCompatActivity {
         SocketEventListener.addAddEventQueue(SocketEventListener.eType.UPDATE_FRIEND_LIST, eventListener);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
 
     @Override
     protected void onDestroy() {
@@ -125,7 +130,7 @@ public class FriendsActivity extends AppCompatActivity {
             this.dataAdapter = dataAdapter;
             nameTextView = itemView.findViewById(R.id.friendName);
             friendProfileImage = itemView.findViewById(R.id.friendProfileImage);
-            itemView.findViewById(R.id.dmButton).setOnClickListener(new View.OnClickListener() {
+            itemView.findViewById(R.id.friendButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     SocketConnection.sendMessage(new JsonUtil()

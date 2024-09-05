@@ -27,7 +27,6 @@ public class AddProjectSetNameActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_project_name);
-
         DataManager.Instance().currentContext = this;
 
         joinNewProjectInput = findViewById(R.id.project_join_input);
@@ -37,6 +36,12 @@ public class AddProjectSetNameActivity extends AppCompatActivity {
         isPrivate = intent.getBooleanExtra(IS_PRIVATE, false);
 
         joinNewProjectButton.setOnClickListener(v -> createNewProject());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
     }
 
     public void createNewProject(){

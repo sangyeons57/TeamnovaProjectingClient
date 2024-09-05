@@ -17,8 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_DMList;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FileList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_Project;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_ProjectStructure;
+import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_UserList;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
@@ -39,7 +41,7 @@ public class HomeFragment extends Fragment {
     private DMAdapter dmAdapterMyAdapter;
     private ProjectAdapter projectAdapter;
 
-    private RecyclerView serverListRecyclerView;
+    private RecyclerView projectListRecyclerView;
     private ProjectListAdapter projectListAdapter;
     private List<ProjectListAdapter.MyItem> projectListItemList;
 
@@ -61,24 +63,24 @@ public class HomeFragment extends Fragment {
         projectListAdapter = new ProjectListAdapter(projectListItemList);
 
 
-        dmButton = view.findViewById(R.id.dmButton);
+        dmButton = view.findViewById(R.id.friendButton);
         contentRecyclerview = view.findViewById(R.id.content_recyclerview);
         contentRecyclerview.setLayoutManager(new LinearLayoutManager(view.getContext()));
         contentRecyclerview.setAdapter(setDMAdapterItemList());
 
-        serverListRecyclerView = view.findViewById(R.id.server_list_recyclerview);
-        serverListRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        serverListRecyclerView.setAdapter(projectListAdapter);
+        projectListRecyclerView = view.findViewById(R.id.project_list_recyclerview);
+        projectListRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        projectListRecyclerView.setAdapter(projectListAdapter);
 
         fragmentManager = getChildFragmentManager();
 
         if(DataManager.Instance().userId != DataManager.NOT_SETUP_I){
-            setHomeServerList(view);
+            setHomeProjectList(view);
             setHomeContentDM(view);
         }
 
         SocketEventListener.addAddEventQueue(SocketEventListener.eType.JOIN_PROJECT, (j)->{
-            setHomeServerList(view);
+            setHomeProjectList(view);
             return false;
         });
 
@@ -98,7 +100,6 @@ public class HomeFragment extends Fragment {
                 DataManager.Instance().projectName = jsonUtil.getString(JsonUtil.Key.PROJECT_NAME, "");
                 setHomeContentProject(view);
             }
-
             DataManager.Instance().mainHandler.post(()->projectAdapter.notifyDataSetChanged());
 
             return false;
@@ -118,12 +119,13 @@ public class HomeFragment extends Fragment {
 
         reloadProjectListListener = (j)->{
             Log.d("ReloadProjectListListener", "reloadProjectListListener");
-            DataManager.Instance().mainHandler.post(()-> projectAdapter.notifyDataSetChanged());
+            DataManager.Instance().mainHandler.post(projectAdapter::notifyDataSetChanged);
             return false;
         };
         SocketEventListener.addAddEventQueue(SocketEventListener.eType.EDIT_CATEGORY_NAME, reloadProjectListListener );
         SocketEventListener.addAddEventQueue(SocketEventListener.eType.CREATE_CHANNEL, reloadProjectListListener);
 
+        LocalDBMain.printAllRows(DB_UserList.class);
 
         return view;
     }
@@ -131,8 +133,14 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(DataManager.Instance().projectId != DataManager.NOT_SETUP_I){
-        }
+        LocalDBMain.printAllRows(DB_Project.class);
+        LocalDBMain.printAllRows(DB_FileList.class);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setHomeProjectList(view);
     }
 
     @Override
@@ -145,7 +153,7 @@ public class HomeFragment extends Fragment {
         SocketEventListener.addRemoveEventQueue(SocketEventListener.eType.GET_PROJECT_DATA, getProjectDataEventListener);
     }
 
-    private void setHomeServerList(View view) {
+    private void setHomeProjectList(View view) {
 
         new Retry(()->{
             try{
@@ -157,7 +165,7 @@ public class HomeFragment extends Fragment {
                 e.printStackTrace();
                 return false;
             }
-        }).setMaxRetries(5).setRetryInterval(0).execute();
+        }).setMaxRetries(5).setRetryInterval(100).execute();
 
         SocketConnection.sendMessage(new JsonUtil()
                 .add(JsonUtil.Key.TYPE, SocketEventListener.eType.GET_ALL_PROJECT_USER_INCLUDED)
@@ -174,14 +182,13 @@ public class HomeFragment extends Fragment {
             private void display(Cursor cursor) {
                 projectListItemList.clear();
                 while (cursor.moveToNext()){
-                    cursor.getInt(1);
                     projectListItemList.add( new ProjectListAdapter.MyItem(
                             cursor.getInt(0),
                             cursor.getString(1),
-                            R.drawable.day_background
+                            cursor.getInt(2)
                     ));
                 }
-                projectListItemList.add(new ProjectListAdapter.MyItem( 0, "", R.drawable.ic_add ));
+                projectListItemList.add(new ProjectListAdapter.MyItem( DataManager.NOT_SETUP_I, "", DataManager.NOT_SETUP_I ));
                 DataManager.Instance().mainHandler.post(projectListAdapter::notifyDataSetChanged);
             }
         });
@@ -190,14 +197,13 @@ public class HomeFragment extends Fragment {
     private void displayDataFromLocalDB(Cursor cursor){
         projectListItemList.clear();
         while (cursor.moveToNext()){
-            cursor.getInt(1);
             projectListItemList.add( new ProjectListAdapter.MyItem(
                     cursor.getInt(0),
                     cursor.getString(1),
-                    R.drawable.day_background
+                    cursor.getInt(2)
             ));
         }
-        projectListItemList.add(new ProjectListAdapter.MyItem( 0, "", R.drawable.ic_add ));
+        projectListItemList.add(new ProjectListAdapter.MyItem( 0, "", DataManager.NOT_SETUP_I ));
         DataManager.Instance().mainHandler.post(projectListAdapter::notifyDataSetChanged);
     }
 
@@ -226,21 +232,20 @@ public class HomeFragment extends Fragment {
         new Retry(() ->{
             try {
                 LocalDBMain.GetTable(DB_DMList.class).getAllOrderByLastTime().execute(new CursorReturn.Execute() {
-                    int i = 0;
                     @Override
                     public void run(Cursor cursor) {
                         DataManager.Instance().dmItemList.clear();
                         while (cursor.moveToNext()){
-                            ++i;
 
                             int channelId = cursor.getInt(0);
                             int otherId = cursor.getInt(1);
                             String lastTime = cursor.getString(2);
                             String otherUsername = cursor.getString(3);
-                            LocalDBMain.LOG(i + " " + channelId + " " + otherId + " " + lastTime + " " + otherUsername + " ");
+                            int profileImageId = cursor.getInt(4);
+                            LocalDBMain.LOG(channelId + " " + otherId + " " + lastTime + " " + otherUsername + " " + profileImageId);
 
                             DataManager.Instance().dmItemList
-                                    .add(new DMAdapter.DataModel(otherUsername, channelId));
+                                    .add(new DMAdapter.DataModel(otherUsername, channelId, profileImageId));
                         }
                     }
                 });
@@ -261,7 +266,6 @@ public class HomeFragment extends Fragment {
         new Retry(()->{
             try {
                 JSONObject structure = LocalDBMain.GetTable(DB_ProjectStructure.class).getStructureById(DataManager.Instance().projectId);
-                Log.d("1234",structure.toString());
                 DataManager.Instance().projectItemList = GetProjectData.getProjectItemListFromStructure(structure);
                 projectAdapter = new ProjectAdapter(DataManager.Instance().projectItemList, getParentFragmentManager());
                 return true;

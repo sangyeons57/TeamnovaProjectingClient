@@ -47,7 +47,7 @@ public class ProjectJoinDialogFragment extends DialogFragment {
         if (token == null) {
             setupInvitationFail();
         } else {
-            SocketConnection.sendMessage(new JsonUtil()
+            SocketConnection.sendMessage(false, new JsonUtil()
                     .add(JsonUtil.Key.TYPE, SocketEventListener.eType.IDENTIFY_PROJECT_INVITATIONS)
                     .add(JsonUtil.Key.TOKEN, token));
             SocketEventListener.addAddEventQueue(SocketEventListener.eType.IDENTIFY_PROJECT_INVITATIONS, new SocketEventListener.EventListenerOnce(SocketEventListener.eType.IDENTIFY_PROJECT_INVITATIONS){
@@ -66,7 +66,6 @@ public class ProjectJoinDialogFragment extends DialogFragment {
                 }
             });
         }
-        this.textView.setText(token);
 
         return view;
     }

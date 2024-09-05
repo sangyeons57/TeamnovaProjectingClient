@@ -100,6 +100,12 @@ public class FindPasswordActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
     private void sendMail(String email) {
         if( email != null && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             ServerConnectManager serverConnectManager = new ServerConnectManager(ServerConnectManager.Path.CERTIFICATION.getPath("ResetPasswordRequest.php"))

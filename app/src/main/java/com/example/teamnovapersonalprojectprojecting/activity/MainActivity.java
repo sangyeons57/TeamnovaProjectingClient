@@ -1,5 +1,6 @@
 package com.example.teamnovapersonalprojectprojecting.activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -8,6 +9,8 @@ import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.NavGraph;
 import androidx.navigation.Navigation;
@@ -36,6 +39,12 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
         // testHttpGetConnection();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
     }
 
     private void testHttpGetConnection() {
@@ -67,5 +76,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
-
 }

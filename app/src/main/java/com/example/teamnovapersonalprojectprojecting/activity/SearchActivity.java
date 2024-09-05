@@ -15,4 +15,9 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
         DataManager.Instance().currentContext = this;
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
 }

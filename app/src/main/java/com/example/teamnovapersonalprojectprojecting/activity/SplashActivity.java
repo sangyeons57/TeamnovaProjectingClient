@@ -10,8 +10,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.socket.FileSocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
+
+import java.nio.file.Files;
 
 public class SplashActivity extends AppCompatActivity {
     private static final int SPLASH_DISPLAY_LENGTH = 2000;
@@ -26,7 +29,6 @@ public class SplashActivity extends AppCompatActivity {
         DataManager.Instance().mainHandler = new Handler(Looper.getMainLooper());
         boolean isFirstRun = preferences.getBoolean(KEY_IS_FIRST_RUN, true);
 
-        SocketConnection.Instance();
 
         if(isFirstRun){
             setContentView(R.layout.activity_splash);
@@ -44,5 +46,10 @@ public class SplashActivity extends AppCompatActivity {
 
             finish();
         }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
     }
 }

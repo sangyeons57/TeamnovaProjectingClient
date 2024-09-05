@@ -1,17 +1,27 @@
 package com.example.teamnovapersonalprojectprojecting.chat;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +59,7 @@ public class ChatActivity extends AppCompatActivity {
     private ChatAdapter adapter;
 
     private ImageButton sendButton;
+    private ImageButton addMultiMediaButton;
     private EditText messageEditText;
     private TextView channelNameTextView;
 
@@ -70,6 +82,7 @@ public class ChatActivity extends AppCompatActivity {
         sendButton = findViewById(R.id.sendButton);
         messageEditText = findViewById(R.id.messageEditText);
         channelNameTextView = findViewById(R.id.channelNameTextView);
+        addMultiMediaButton = findViewById(R.id.multiMediaButton);
 
         chatRecyclerView = findViewById(R.id.chatRecylerView);
         layoutManager = new LinearLayoutManager(this);
@@ -208,7 +221,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-         eventListener = (jsonUtil)->{
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.SEND_MESSAGE, eventListener = (jsonUtil)->{
              int chatId = jsonUtil.getInt(JsonUtil.Key.CHAT_ID, 0);
              int writerId = jsonUtil.getInt(JsonUtil.Key.USER_ID, 0);
              String message = jsonUtil.getString(JsonUtil.Key.MESSAGE, "");
@@ -247,8 +260,8 @@ public class ChatActivity extends AppCompatActivity {
                  });
             }
             return false;
-        };
-        SocketEventListener.addAddEventQueue(SocketEventListener.eType.SEND_MESSAGE, eventListener);
+        });
+
     }
 
     @Override
@@ -303,4 +316,14 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    private ActivityResultLauncher<Intent> someActivityResultLauncher;
+    // 이미지 선택을 위한 인텐트를 시작하는 메서드
+    private void openImageChooser() {
+
+    }
+
+
+
 }

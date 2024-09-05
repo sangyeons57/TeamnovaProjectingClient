@@ -34,6 +34,7 @@ public class AddChannelActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project_create_channel);
+        DataManager.Instance().currentContext = this;
         Intent intent = getIntent();
 
         projectId = intent.getIntExtra(EditCategoryDialogFragment.PROJECT_ID, 0);
@@ -46,6 +47,11 @@ public class AddChannelActivity extends AppCompatActivity {
         createChannelButton.setOnClickListener(this::createChannelOnClick);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        DataManager.Instance().currentContext = this;
+    }
     public void createChannelOnClick(View view){
         channelName = channelNameTextView.getText().toString().trim();
         if(channelName.isEmpty()){

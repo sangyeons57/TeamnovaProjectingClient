@@ -51,6 +51,18 @@
         android:gravity="center_vertical"
         android:background="@color/default_app_color_d1">
 
+        <ImageButton
+            android:id="@+id/multiMediaButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_add_multimedia"
+            android:background="@drawable/round_background_multimedia"
+            android:backgroundTint="@color/default_app_color_d2"
+            app:tint="@color/default_app_color_bl1"
+            android:scaleX="0.9"
+            android:scaleY="0.9"
+            />
+
         <EditText
             android:id="@+id/messageEditText"
             android:layout_width="0dp"

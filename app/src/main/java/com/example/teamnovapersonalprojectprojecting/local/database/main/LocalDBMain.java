@@ -1,6 +1,7 @@
 package com.example.teamnovapersonalprojectprojecting.local.database.main;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -9,6 +10,8 @@ import androidx.annotation.Nullable;
 
 import com.example.teamnovapersonalprojectprojecting.local.database.LocalDBAttribute;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
+import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
+import com.example.teamnovapersonalprojectprojecting.util.Retry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +19,7 @@ import java.util.Map;
 
 public class LocalDBMain extends SQLiteOpenHelper {
     public static final String DB_NAME = "Main.db";
-    public static final int DB_VERSION = 11;
+    public static final int DB_VERSION = 15;
 
     private Map<Class<? extends LocalDBAttribute>, LocalDBAttribute> databaseMainMap;
 
@@ -65,12 +68,64 @@ public class LocalDBMain extends SQLiteOpenHelper {
         databaseMainMap.put(DB_ProjectMember.class, new DB_ProjectMember(this));
         databaseMainMap.put(DB_ProjectStructure.class, new DB_ProjectStructure(this));
         databaseMainMap.put(DB_ProjectChannelList.class, new DB_ProjectChannelList(this));
+        databaseMainMap.put(DB_FileList.class, new DB_FileList(this));
     }
 
+    public interface AfterCall {
+        public void execute(JsonUtil jsonUtil);
+        public static void Execute(JsonUtil jsonUtil, AfterCall afterCall) {
+            if (afterCall != null) {
+                afterCall.execute(jsonUtil);
+            }
+        }
+    }
 
     public static <T extends LocalDBAttribute> T GetTable(Class<T> table){
         LocalDBAttribute db = Instance().databaseMainMap.get(table);
         return table.cast(db);
+    }
+
+    public static <T extends LocalDBAttribute> void printAllRows(Class<T> table){
+        new Retry(()->{
+            LocalDBAttribute attribute = Instance().databaseMainMap.get(table);
+            String query = "SELECT * FROM " + attribute.getTableName();
+
+            LOG("[" + attribute.getTableName() + "] 테이블 전체 출력");
+            // SQLiteDatabase 인스턴스를 가져와서 읽기 전용으로 엽니다.
+            try (SQLiteDatabase db = attribute.sqlite.getReadableDatabase();
+                 Cursor cursor = db.rawQuery(query, null)) {
+
+                // 커서가 가리키는 첫 번째 행으로 이동합니다.
+                if (cursor != null && cursor.moveToFirst()) {
+                    // 테이블의 컬럼 수를 가져옵니다.
+                    int columnCount = cursor.getColumnCount();
+
+                    // 컬럼 이름들을 출력합니다.
+                    StringBuilder columnNames = new StringBuilder("Columns: ");
+                    for (int i = 0; i < columnCount; i++) {
+                        columnNames.append(cursor.getColumnName(i)).append(" | ");
+                    }
+                    LOG(columnNames.toString());
+
+                    LOG("-----------------------");
+
+                    // 각 행을 반복하며 데이터를 출력합니다.
+                    do {
+                        for (int i = 0; i < columnCount; i++) {
+                            String columnName = cursor.getColumnName(i);
+                            String columnValue = cursor.getString(i);
+                            LOG(columnName, columnValue);
+                        }
+                        LOG("-----------------------");
+                    } while (cursor.moveToNext()); // 다음 행으로 이동
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }).setMaxRetries(5).setRetryInterval(1000).execute();
     }
 
 

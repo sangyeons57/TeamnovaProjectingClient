@@ -15,6 +15,8 @@ import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetChannel
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetProjectData;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.JoinChannel;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.AddDMElement;
+import com.example.teamnovapersonalprojectprojecting.socket.eventList.PingPong;
+import com.example.teamnovapersonalprojectprojecting.socket.eventList.ReconnectFileSocket;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.ReloadDMList;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.SendMessage;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
@@ -31,9 +33,13 @@ import java.util.Queue;
 public class SocketEventListener {
     public enum eType {
         NONE("NONE"),
+        PING_PONG("PING_PONG"),
+        FILE("FILE"),
+        FILE_INPUT_STREAM("FILE_INPUT_STREAM"),
         ADD_DM_ELEMENT("AddDMElement"),
         ADD_FRIEND_ON_WAITING("AddFriendOnWaiting"),
         ADD_WAITING("AddWaiting"),
+        ALARM_DM("AlarmDM"),
         CHECK_CHANNEL_EXIST("CheckChannelExist"),
         CREATE_DM_CHANNEL("CreateDMChannel"),
         CREATE_PROJECT("CreateProject"),
@@ -54,14 +60,19 @@ public class SocketEventListener {
         GET_CHAT_DATA("GetChatData"),
         GET_USER_DATA("GetUserData"),
         GET_LAST_CHAT_ID("GetLastChatId"),
+        GET_FILE("GetFile"),
         GET_PROJECT_MEMBER_JOIN_TOKEN("GetProjectMemberJoinToken"),
         JOIN_CHANNEL("JoinChannel"),
         JOIN_PROJECT("JoinProject"),
         REMOVE_WAITING("RemoveWaiting"),
         RELOAD_DM_LIST("ReloadDMList"),
+        RECONNECT_FILE_SOCKET("ReconnectFileSocket"),
         SEND_DM_END("SendDMEnd"),
         SEND_MESSAGE("SendMessage"),
+        SEND_MESSAGE_SPECIFIC_PERSON("SendMessageSpecificPerson"),
         SET_USER("SetUser"),
+        SET_PROFILE_IMAGE("SetProfileImage"),
+        SET_PROJECT_PROFILE_IMAGE("SetProjectProfileImage"),
         UPDATE_FRIEND_LIST("UpdateFriendList"),
         IDENTIFY_PROJECT_INVITATIONS("IdentifyProjectInvitations"),
 
@@ -111,10 +122,12 @@ public class SocketEventListener {
         addEvent(eType.GET_CHANNEL_DATA, new GetChannelData());
         addEvent(eType.GET_PROJECT_DATA, new GetProjectData());
         addEvent(eType.RELOAD_DM_LIST, new ReloadDMList());
+        addEvent(eType.RECONNECT_FILE_SOCKET, new ReconnectFileSocket());
         addEvent(eType.GET_CHAT_DATA, new GetChatData());
         addEvent(eType.SEND_MESSAGE, new SendMessage());
         addEvent(eType.GET_CHANNEL_PROJECT, new GetChannelProject());
         addEvent(eType.DELETE_CHANNEL, new DeleteChannel());
+        addEvent(eType.PING_PONG, new PingPong());
     }
 
     public static void LOG(String title, String logText){
@@ -206,7 +219,6 @@ public class SocketEventListener {
         }
 
         while ((entry = removeListenerQueue.poll()) != null){
-            SocketConnection.LOG("REMOVE EVENT", entry.getKey().toString());
             removeEvent(entry.getKey(), entry.getValue());
         }
     }

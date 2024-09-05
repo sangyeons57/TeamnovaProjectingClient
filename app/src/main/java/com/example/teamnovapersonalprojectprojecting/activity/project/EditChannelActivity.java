@@ -31,6 +31,7 @@ public class EditChannelActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project_edit_channel);
+        DataManager.Instance().currentContext = this;
 
         channelNameEditText = findViewById(R.id.channelNameEditText);
         deleteChannelButton = findViewById(R.id.deleteChannelButton);
@@ -46,6 +47,12 @@ public class EditChannelActivity extends AppCompatActivity {
 
         deleteChannelButton.setOnClickListener(this::onClickDeleteChannelButton);
         saveChannelButton.setOnClickListener(this::onClickSaveChannelButton);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
     }
 
     private void onClickDeleteChannelButton(View view){

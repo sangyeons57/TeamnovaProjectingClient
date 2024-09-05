@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 
 public class EditCategoryDialogFragment extends DialogFragment {
     public static final String PROJECT_ID = "projectId";
@@ -70,7 +71,6 @@ public class EditCategoryDialogFragment extends DialogFragment {
             getDialog().getWindow().setGravity(Gravity.BOTTOM);
         }
     }
-
 
 
     public void onClickEditCategory(View view) {

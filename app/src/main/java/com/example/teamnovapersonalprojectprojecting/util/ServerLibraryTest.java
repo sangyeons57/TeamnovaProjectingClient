@@ -2,6 +2,7 @@ package com.example.teamnovapersonalprojectprojecting.util;
 
 import android.util.Log;
 
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -80,7 +81,7 @@ public class ServerLibraryTest extends ServerConnectManager {
                         Unpooled.copiedBuffer("{\"message\":\"Hello, PHP Server!\"}", CharsetUtil.UTF_8));
                 Log("before headers");
 
-                request.headers().set(HttpHeaders.Names.HOST, BASE_URL + Path.TEST.getPath("NettyTest.php"));
+                request.headers().set(HttpHeaders.Names.HOST, SocketConnection.SERVER_ADDRESS + Path.TEST.getPath("NettyTest.php"));
                 request.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
                 request.headers().set(HttpHeaders.Names.CONTENT_LENGTH, request.content().readableBytes());
 
@@ -107,7 +108,7 @@ public class ServerLibraryTest extends ServerConnectManager {
         params.put("param2", "value22");
 
         // Perform a GET request to the specified URL
-        client.post(BASE_URL + Path.TEST.getPath("AsyncHttpClientTest.php"), params, new AsyncHttpResponseHandler() {
+        client.post(SocketConnection.SERVER_ADDRESS + Path.TEST.getPath("AsyncHttpClientTest.php"), params, new AsyncHttpResponseHandler() {
 
             @Override
             public void onStart() {

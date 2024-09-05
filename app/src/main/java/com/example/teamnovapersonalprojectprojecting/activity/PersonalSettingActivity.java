@@ -42,4 +42,9 @@ public class PersonalSettingActivity extends AppCompatActivity {
             DataManager.Instance().Logout(this);;
         });
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
 }

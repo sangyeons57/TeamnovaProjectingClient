@@ -39,6 +39,11 @@ public class JoinActivity extends AppCompatActivity {
         // Start with the EmailFragment
         showEmailFragment();
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataManager.Instance().currentContext = this;
+    }
 
     //필요한 정보를 다 체운후 계정 생성 하는 코드
     public void generateAccount(){
