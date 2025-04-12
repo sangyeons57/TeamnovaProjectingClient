@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <LinearLayout
+        android:id="@+id/top_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/default_app_color_d1"
+        app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center_vertical"
+        android:padding="12dp">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_back"
+            android:background="@drawable/transparent_background"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="오늘 날짜"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/addScheduleButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="일정 추가"
+            />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_layout"
+        tools:layout_editor_absoluteX="0dp">
+
+        <com.example.teamnovapersonalprojectprojecting.ui.calendar.TimeRangeViewGroup
+            android:id="@+id/timeRangeViewGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

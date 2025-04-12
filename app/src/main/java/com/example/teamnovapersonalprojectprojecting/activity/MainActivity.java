@@ -1,16 +1,22 @@
 package com.example.teamnovapersonalprojectprojecting.activity;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.service.DMAlarmForegroundService;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.NavGraph;
 import androidx.navigation.Navigation;
@@ -38,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         navController.setGraph(navGraph);
         NavigationUI.setupWithNavController(navView, navController);
 
-        // testHttpGetConnection();
+        DMAlarmForegroundService.Instance(this);
     }
 
     @Override

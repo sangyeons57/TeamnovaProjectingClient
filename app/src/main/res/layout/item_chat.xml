@@ -16,43 +16,77 @@
         />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bodyConstraintLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginStart="8dp">
+        android:layout_marginStart="8dp"
+        android:layout_weight="1">
 
         <TextView
             android:id="@+id/nameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/test_username"
+            android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/white"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/dateTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
             android:text="00시 00분"
             android:textColor="@color/white"
             android:textSize="12sp"
-            android:layout_marginLeft="7dp"
-            app:layout_constraintStart_toEndOf="@id/nameTextView"
-            app:layout_constraintBottom_toBottomOf="@id/nameTextView"/>
-
+            app:layout_constraintBottom_toBottomOf="@id/nameTextView"
+            app:layout_constraintStart_toEndOf="@id/nameTextView" />
         <TextView
-            android:id="@+id/messageTextView"
-            android:text="@string/test_chat_message"
+            android:id="@+id/modifiedIndicateTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="17sp"
-            android:textColor="@color/white"
-            android:autoLink="none"
-            android:linksClickable="true"
+            android:text="(수정됨)"
+            android:textColor="@color/default_app_color_bl1_highlight"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@id/dateTextView"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="visible"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contentBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/nameTextView"
-            app:layout_constraintStart_toStartOf="parent"/>
+            >
+
+            <TextView
+                android:id="@+id/messageTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="none"
+                android:linksClickable="true"
+                android:text="@string/test_chat_message"
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/imagePlaceLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/messageTextView"
+                android:orientation="vertical">
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

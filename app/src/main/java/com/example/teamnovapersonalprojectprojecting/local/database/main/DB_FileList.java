@@ -5,9 +5,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Debug;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.example.teamnovapersonalprojectprojecting.R;
 import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.LocalDBAttribute;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
@@ -36,8 +39,8 @@ public class DB_FileList extends LocalDBAttribute {
             } else {
                 getFileFromServer(fileId);
 
-                //이벤트를 안보네는경우에는 바로 실행
-                if (fileId <= DataManager.NOT_SETUP_I){
+                if (fileId == DataManager.NOT_SETUP_I){
+                    //이벤트를 안보네는경우에는 바로 실행
                     LocalDBMain.AfterCall.Execute(new JsonUtil().add(JsonUtil.Key.IS_EXIST, false), afterCall);
                 } else {
                     SocketEventListener.addAddEventQueue(SocketEventListener.eType.FILE_INPUT_STREAM, new SocketEventListener.EventListenerOnce(SocketEventListener.eType.FILE_INPUT_STREAM) {
@@ -80,7 +83,7 @@ public class DB_FileList extends LocalDBAttribute {
             db.replace(getTableName(), null, values);
         }
     }
-    public static void setFileImage(ImageView imageView, String filePath){
+    public static void setFileImageToCircle(ImageView imageView, String filePath){
         if(filePath == null){
             return;
         }
@@ -90,6 +93,20 @@ public class DB_FileList extends LocalDBAttribute {
                 Glide.with(DataManager.Instance().currentContext)
                         .load(file.getAbsolutePath())
                         .circleCrop()
+                        .into(imageView);
+            });
+        }
+    }
+    public static void setFileImage(ImageView imageView, String filePath){
+        if(filePath == null){
+            return;
+        }
+        File file = new File(filePath);
+        if (file.exists()) {
+            DataManager.Instance().mainHandler.post(() -> {
+                Glide.with(DataManager.Instance().currentContext)
+                        .load(file.getAbsolutePath())
+                        .placeholder(R.drawable.ic_image)
                         .into(imageView);
             });
         }

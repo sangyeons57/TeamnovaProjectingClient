@@ -1,6 +1,7 @@
 package com.example.teamnovapersonalprojectprojecting.socket;
 
 
+import android.content.Intent;
 import android.util.Log;
 
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
@@ -13,7 +14,10 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -23,10 +27,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class SocketConnection {
     public static final int PORT = 5000;
-    public static final String IP = "54-180-132-52";
+    public static final String IP = "43-203-248-22";
     public static final String REGION = ".ap-northeast-2";
     public static final String SERVER_ADDRESS = "ec2-" + IP + REGION + ".compute.amazonaws.com";
     public static final String NOT_SETUP = "NOT_SETUP";
+    public static final int TIMEOUT = 35000;
 
     private static SocketConnection instance = null;
     public static SocketConnection Instance(){
@@ -36,6 +41,13 @@ public class SocketConnection {
         return instance;
     }
     public static void Reset(){
+        if(instance.clientSocket != null) {
+            try {
+                instance.clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         instance = null;
     }
 
@@ -73,6 +85,7 @@ public class SocketConnection {
                 try {
                     LOG("try connect to server ServerAddress: " + SERVER_ADDRESS + " PORT: " + PORT);
                     clientSocket = new Socket(SERVER_ADDRESS, PORT);
+                    clientSocket.setSoTimeout(TIMEOUT);
                     in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     out = new DataOutputStream(clientSocket.getOutputStream());
 
@@ -81,15 +94,29 @@ public class SocketConnection {
                     setInputStream();
                     setOutputStream();
                     setReconnectSystem();
+                } catch (SocketException e) {
+                    e.printStackTrace();
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                     LOGe(e.getMessage());
+                    try {
+                        Thread.sleep(5000);
+                        Instance().startReconnect();
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     /**
                      * 오프라인 기능 대처하는 만들려면 이쪽에서 구현하면됨
                      */
                 } catch (IOException e) {
                     e.printStackTrace();
                     LOGe(e.getMessage());
+                    try {
+                        Thread.sleep(5000);
+                        Instance().startReconnect();
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         });
@@ -147,6 +174,8 @@ public class SocketConnection {
     private void startReconnect(){
         instance.close();
         LOG("start try reconnect message socket");
+        Instance();
+
         SocketConnection.sendMessage(false, new JsonUtil()
                 .add(JsonUtil.Key.TYPE, SocketEventListener.eType.SET_USER.toString())
                 .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId));
@@ -159,13 +188,12 @@ public class SocketConnection {
                 SocketConnection.sendMessage(new JsonUtil().add(JsonUtil.Key.TYPE, SocketEventListener.eType.PING_PONG.toString()));
                 DataManager.Instance().checkPingPong = false;
                 try {
-                    Thread.sleep(15000);
+                    Thread.sleep(TIMEOUT - 5000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
             SocketConnection.Instance().startReconnect();
-            FileSocketConnection.Instance().startReconnect();
         }).start();
     }
 

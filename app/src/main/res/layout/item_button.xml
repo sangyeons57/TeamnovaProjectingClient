@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Button
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="20dp"
+    android:text="역할 이름"
+    android:textAlignment="viewStart"
+    android:textSize="16sp"
+    android:textStyle="bold"
+    >
+</Button>

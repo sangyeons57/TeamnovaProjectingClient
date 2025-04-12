@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.teamnovapersonalprojectprojecting.activity.MainActivity;
 import com.example.teamnovapersonalprojectprojecting.activity.project.AddProjectActivity;
 import com.example.teamnovapersonalprojectprojecting.activity.project.AddProjectSetNameActivity;
 import com.example.teamnovapersonalprojectprojecting.R;
@@ -27,7 +26,6 @@ import com.example.teamnovapersonalprojectprojecting.util.Retry;
 
 import org.json.JSONArray;
 
-import java.io.File;
 import java.util.List;
 
 public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.MyViewHolder> {
@@ -77,7 +75,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
                     LocalDBMain.GetTable(DB_FileList.class).checkFileExistAndCall(item.getImage(), jsonUtil -> {
                         LocalDBMain.GetTable(DB_FileList.class).getFileData(item.getImage()).execute((cursor)-> {
                             if(cursor.moveToFirst()){
-                                DB_FileList.setFileImage(holder.imageView, cursor.getString(3));
+                                DB_FileList.setFileImageToCircle(holder.imageView, cursor.getString(3));
                                 if(!jsonUtil.getBoolean(JsonUtil.Key.IS_EXIST, false)){
                                     Log.d("test", "notify");
                                     DataManager.Instance().mainHandler.post(() -> this.notifyItemChanged(position));

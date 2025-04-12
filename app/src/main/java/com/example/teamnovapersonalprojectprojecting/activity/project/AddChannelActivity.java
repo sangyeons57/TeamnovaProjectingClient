@@ -11,12 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.teamnovapersonalprojectprojecting.R;
-import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_ProjectChannelList;
-import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_ProjectStructure;
-import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
 import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
-import com.example.teamnovapersonalprojectprojecting.ui.home.ProjectAdapter;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 
@@ -40,7 +36,7 @@ public class AddChannelActivity extends AppCompatActivity {
         projectId = intent.getIntExtra(EditCategoryDialogFragment.PROJECT_ID, 0);
         categoryId = intent.getIntExtra(EditCategoryDialogFragment.CATEGORY_ID, 0);
 
-        channelNameTextView = findViewById(R.id.channelNameTextView);
+        channelNameTextView = findViewById(R.id.userNameTextView);
         createChannelButton = findViewById(R.id.createChannelButton);
         warningTextView = findViewById(R.id.warningTextView);
 

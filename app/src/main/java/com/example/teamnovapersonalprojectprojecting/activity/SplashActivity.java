@@ -26,6 +26,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         DataManager.Instance().currentContext = this;
+        SocketConnection.Instance();
         DataManager.Instance().mainHandler = new Handler(Looper.getMainLooper());
         boolean isFirstRun = preferences.getBoolean(KEY_IS_FIRST_RUN, true);
 

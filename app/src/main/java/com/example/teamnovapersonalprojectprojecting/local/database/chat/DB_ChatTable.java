@@ -18,6 +18,11 @@ public class DB_ChatTable extends LocalDBAttribute {
         super(sqlite);
     }
 
+    public void removeChat(int channelId, int chatId) {
+        try(SQLiteDatabase db = this.sqlite.getWritableDatabase();){
+            db.delete(getTableName(), "chatId = ? AND channelId = ?", new String[]{String.valueOf(chatId), String.valueOf(channelId)});
+        }
+    }
     public long addOrUpdateChat(int channelId, int chatId, int writerId, String data, String lastTime, int isModified){
         try (SQLiteDatabase db = this.sqlite.getWritableDatabase();){
             ContentValues values = new ContentValues();
@@ -31,7 +36,7 @@ public class DB_ChatTable extends LocalDBAttribute {
             if(row == -1){
                 LocalDBChat.LOGe("addOrUpdateChat sql error");
             } else {
-                LocalDBChat.LOG("addOrUpdate chat", "[" +row + "] " + chatId + " " + writerId + " " + data + " " + lastTime + " " + isModified);
+                LocalDBChat.LOG("addOrUpdate chat", "[" +row + "] " + channelId + " " + chatId + " " + writerId + " " + data + " " + lastTime + " " + isModified);
             }
             return row;
         }
@@ -50,11 +55,11 @@ public class DB_ChatTable extends LocalDBAttribute {
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
         return cursor;
     }
-    public Cursor getChatData(int channelId, int chatId){
+    public CursorReturn getChatData(int channelId, int chatId){
         String query = "SELECT * FROM " + getTableName() + " WHERE chatId = ? AND channelId = ?";
         SQLiteDatabase db = this.sqlite.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(chatId), String.valueOf(channelId)});
-        return cursor;
+        return new CursorReturn(cursor, db);
     }
     public int getLastChatId(int channelId){
         String query = "SELECT chatId FROM " + getTableName() + " WHERE channelId = ? ORDER BY chatId DESC LIMIT 1";

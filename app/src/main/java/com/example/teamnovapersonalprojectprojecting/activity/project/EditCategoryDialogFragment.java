@@ -11,13 +11,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.teamnovapersonalprojectprojecting.R;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketConnection;
+import com.example.teamnovapersonalprojectprojecting.socket.SocketEventListener;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
+import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 
 public class EditCategoryDialogFragment extends DialogFragment {
     public static final String PROJECT_ID = "projectId";
@@ -74,21 +78,55 @@ public class EditCategoryDialogFragment extends DialogFragment {
 
 
     public void onClickEditCategory(View view) {
-        this.dismiss();
-        Intent intent = new Intent(getActivity(), EditCategoryActivity.class);
-        intent.putExtra(PROJECT_ID, projectId);
-        intent.putExtra(CATEGORY_ID, categoryId);
-        intent.putExtra(CATEGORY_NAME, categoryName);
-        Log.d("EditCategoryDialogFragment", "onClickEditCategory:" + categoryId + " " + categoryName);
-        startActivity(intent);
+        SocketConnection.sendMessage(new JsonUtil()
+                .add(JsonUtil.Key.TYPE, SocketEventListener.eType.CHECK_MEMBER_ATTRIBUTE)
+                .add(JsonUtil.Key.PROJECT_ID, DataManager.Instance().projectId)
+                .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
+                .add(JsonUtil.Key.DATA, "AuthorityEditProjectStructure"));
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.CHECK_MEMBER_ATTRIBUTE, new SocketEventListener.EventListenerOnce(SocketEventListener.eType.CHECK_MEMBER_ATTRIBUTE){
+            @Override
+            public boolean runOnce(JsonUtil jsonUtil) {
+                if(jsonUtil.getBoolean(JsonUtil.Key.IS_VALID, false)) {
+                    dismiss();
+                    Intent intent = new Intent(getActivity(), EditCategoryActivity.class);
+                    intent.putExtra(PROJECT_ID, projectId);
+                    intent.putExtra(CATEGORY_ID, categoryId);
+                    intent.putExtra(CATEGORY_NAME, categoryName);
+                    Log.d("EditCategoryDialogFragment", "onClickEditCategory:" + categoryId + " " + categoryName);
+                    startActivity(intent);
+                } else {
+                    DataManager.Instance().mainHandler.post(()->{
+                        Toast.makeText(getContext(), "권한이 없습니다.", Toast.LENGTH_SHORT).show();
+                    });
+                }
+                return false;
+            }
+        });
     }
 
     public void onClickCreateChannel(View view) {
-        this.dismiss();
-        Intent intent = new Intent(getActivity(), AddChannelActivity.class);
-        intent.putExtra(PROJECT_ID, projectId);
-        intent.putExtra(CATEGORY_ID, categoryId);
-        Log.d("EditCategoryDialogFragment", "onClickEditCategory:" + categoryId + " " + categoryName);
-        startActivity(intent);
+        SocketConnection.sendMessage(new JsonUtil()
+                .add(JsonUtil.Key.TYPE, SocketEventListener.eType.CHECK_MEMBER_ATTRIBUTE)
+                .add(JsonUtil.Key.PROJECT_ID, DataManager.Instance().projectId)
+                .add(JsonUtil.Key.USER_ID, DataManager.Instance().userId)
+                .add(JsonUtil.Key.DATA, "AuthorityEditProjectStructure"));
+        SocketEventListener.addAddEventQueue(SocketEventListener.eType.CHECK_MEMBER_ATTRIBUTE, new SocketEventListener.EventListenerOnce(SocketEventListener.eType.CHECK_MEMBER_ATTRIBUTE){
+            @Override
+            public boolean runOnce(JsonUtil jsonUtil) {
+                if(jsonUtil.getBoolean(JsonUtil.Key.IS_VALID, false)) {
+                    dismiss();
+                    Intent intent = new Intent(getActivity(), AddChannelActivity.class);
+                    intent.putExtra(PROJECT_ID, projectId);
+                    intent.putExtra(CATEGORY_ID, categoryId);
+                    Log.d("EditCategoryDialogFragment", "onClickEditCategory:" + categoryId + " " + categoryName);
+                    startActivity(intent);
+                } else {
+                    DataManager.Instance().mainHandler.post(()->{
+                        Toast.makeText(getContext(), "권한이 없습니다.", Toast.LENGTH_SHORT).show();
+                    });
+                }
+                return false;
+            }
+        });
     }
 }

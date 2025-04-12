@@ -87,6 +87,7 @@ public class HomeFragment extends Fragment {
         dmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                DataManager.Instance().projectId = DataManager.NOT_SETUP_I;
                 setHomeContentDM(v);
             }
         });
@@ -265,15 +266,21 @@ public class HomeFragment extends Fragment {
     private ProjectAdapter setProjectItemList(){
         new Retry(()->{
             try {
+                DataManager.Instance().projectItemList.clear();
                 JSONObject structure = LocalDBMain.GetTable(DB_ProjectStructure.class).getStructureById(DataManager.Instance().projectId);
-                DataManager.Instance().projectItemList = GetProjectData.getProjectItemListFromStructure(structure);
-                projectAdapter = new ProjectAdapter(DataManager.Instance().projectItemList, getParentFragmentManager());
+                for (ProjectAdapter.CategoryItem category: GetProjectData.getProjectItemListFromStructure(structure)) {
+                    DataManager.Instance().projectItemList.add(category);
+                }
                 return true;
             } catch (IllegalStateException e){
                 e.printStackTrace();
             }
             return false;
         }).setMaxRetries(5).setRetryInterval(0).execute();;
+
+        if(projectAdapter == null){
+            projectAdapter = new ProjectAdapter(DataManager.Instance().projectItemList, getParentFragmentManager());
+        }
 
         return projectAdapter;
     }

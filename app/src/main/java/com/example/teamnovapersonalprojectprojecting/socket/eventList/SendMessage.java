@@ -13,7 +13,7 @@ public class SendMessage implements SocketEventListener.EventListener {
         int channelId = jsonUtil.getInt(JsonUtil.Key.CHANNEL_ID, 0);
         int chatId = jsonUtil.getInt(JsonUtil.Key.CHAT_ID, 0);
         int writerId = jsonUtil.getInt(JsonUtil.Key.USER_ID, 0);
-        String dataString = jsonUtil.getString(JsonUtil.Key.DATA, "");
+        String dataString = jsonUtil.getString(JsonUtil.Key.MESSAGE, "");
         String lastTime = jsonUtil.getString(JsonUtil.Key.DATETIME, "");
         boolean isModified = jsonUtil.getBoolean(JsonUtil.Key.IS_MODIFIED, false);
 

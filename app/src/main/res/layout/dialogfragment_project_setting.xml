@@ -121,7 +121,26 @@
                 android:layout_marginTop="20dp"
                 android:backgroundTint="@color/default_app_color_d1"
                 />
-
+            <Button
+                android:id="@+id/edit_role_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="역할 편집하기"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:paddingLeft="20dp"
+                android:backgroundTint="@color/default_app_color_d1"
+                />
+            <Button
+                android:id="@+id/edit_member_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="맴버 편집하기"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:paddingLeft="20dp"
+                android:backgroundTint="@color/default_app_color_d1"
+                />
 
             <Button
                 android:id="@+id/deleteProjectButton"

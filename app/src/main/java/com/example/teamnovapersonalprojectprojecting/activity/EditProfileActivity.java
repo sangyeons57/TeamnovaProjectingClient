@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -42,6 +43,8 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<Intent> pickImageLauncher;
 
+    private boolean isClicked = false;
+
     private Uri profileImage;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,14 +72,13 @@ public class EditProfileActivity extends AppCompatActivity {
                 }
             }
         });
-
+        DB_FileList.setFileImageToCircle(profileImageButton, DataManager.Instance().profilePath);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         DataManager.Instance().currentContext = this;
-        DB_FileList.setFileImage(profileImageButton, DataManager.Instance().profilePath);
     }
 
     private void deleteImage(View view){
@@ -84,7 +86,6 @@ public class EditProfileActivity extends AppCompatActivity {
         profileImage = null;
     }
 
-    private boolean isClicked = false;
     private void sendData(View view){
         if (isClicked){
             return;
@@ -115,20 +116,41 @@ public class EditProfileActivity extends AppCompatActivity {
                 DataManager.Instance().profilePath = LocalDBMain.GetTable(DB_UserList.class).getProfileImagePath(DataManager.Instance().userId);
                 DataManager.reloadUserData(DataManager.Instance().userId);
                 finish();
+                isClicked = false;
             });
         });
     }
 
     public void onClickProfileImageButton(View view){
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            // 권한이 없는 경우
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    DataManager.PERMISSION_READ_EXTERNAL_STORAGE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13 이상에서는 READ_MEDIA_IMAGES 권한 사용
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.READ_MEDIA_IMAGES
+            ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // 권한 요청
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                        DataManager.PERMISSION_READ_MEDIA_IMAGE
+                );
+            } else {
+                // 권한이 이미 허용된 경우 이미지 선택기 열기
+                imagePick();
+            }
         } else {
-            imagePick();
+            // Android 13 이하 버전은 기존의 READ_EXTERNAL_STORAGE 사용
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        DataManager.PERMISSION_READ_EXTERNAL_STORAGE);
+            } else {
+                imagePick();
+            }
         }
     }
 
@@ -136,6 +158,12 @@ public class EditProfileActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == DataManager.PERMISSION_READ_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                imagePick();
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == DataManager.PERMISSION_READ_MEDIA_IMAGE){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 imagePick();
             } else {

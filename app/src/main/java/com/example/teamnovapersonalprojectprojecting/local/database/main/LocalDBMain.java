@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class LocalDBMain extends SQLiteOpenHelper {
     public static final String DB_NAME = "Main.db";
-    public static final int DB_VERSION = 15;
+    public static final int DB_VERSION = 18;
 
     private Map<Class<? extends LocalDBAttribute>, LocalDBAttribute> databaseMainMap;
 
@@ -69,6 +69,7 @@ public class LocalDBMain extends SQLiteOpenHelper {
         databaseMainMap.put(DB_ProjectStructure.class, new DB_ProjectStructure(this));
         databaseMainMap.put(DB_ProjectChannelList.class, new DB_ProjectChannelList(this));
         databaseMainMap.put(DB_FileList.class, new DB_FileList(this));
+        databaseMainMap.put(DB_Schedules.class, new DB_Schedules(this));
     }
 
     public interface AfterCall {

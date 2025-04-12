@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+    android:background="@color/default_app_color_d1">
+    <LinearLayout
+        android:id="@+id/top_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/default_app_color_d1"
+        app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center_vertical"
+        android:padding="4dp">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_back"
+            android:background="@drawable/transparent_background"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/userNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="서버 역할"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            />
+    </LinearLayout>
+    
+    <EditText
+        android:id="@+id/roleNameEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_layout"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        android:hint="역할 이름"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/white"
+        android:textColorHint="@color/default_app_color_bl1"
+        />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/roleNameEditText"
+        app:layout_constraintBottom_toTopOf="@id/saveButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginVertical="20dp"
+        android:layout_marginHorizontal="20dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/round_background"
+            android:backgroundTint="@color/default_app_color_bl1"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="맴버 초대권한"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_weight="1"
+                />
+            <Switch
+                android:id="@+id/authority_memeber_invite_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/round_background"
+            android:backgroundTint="@color/default_app_color_bl1"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:layout_marginTop="10dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="프로젝트 구조 편집 권한"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_weight="1"
+                />
+            <Switch
+                android:id="@+id/authority_edit_project_structure_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/round_background"
+            android:backgroundTint="@color/default_app_color_bl1"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:layout_marginTop="10dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="프로젝트 설정 권한"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_weight="1"
+                />
+            <Switch
+                android:id="@+id/authority_setting_project_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp"
+        android:text="저장하기"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

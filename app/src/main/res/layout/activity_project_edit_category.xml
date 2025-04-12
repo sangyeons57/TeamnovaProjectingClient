@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
             <TextView
-                android:id="@+id/title"
+                android:id="@+id/titleTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -40,7 +40,7 @@
                 android:hint="카테고리 이름"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/title"
+                app:layout_constraintTop_toBottomOf="@id/titleTextView"
                 android:inputType="textNoSuggestions"
                 />
 

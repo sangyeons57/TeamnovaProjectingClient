@@ -15,6 +15,7 @@ public class JoinChannel implements SocketEventListener.EventListener {
 
         if (status.contains("success")) {
             DataManager.Instance().channelId = jsonUtil.getInt(JsonUtil.Key.CHANNEL_ID, DataManager.NOT_SETUP_I);
+            DataManager.Instance().projectId = jsonUtil.has(JsonUtil.Key.PROJECT_ID) ? jsonUtil.getInt(JsonUtil.Key.PROJECT_ID, DataManager.NOT_SETUP_I) : DataManager.NOT_SETUP_I;
 
             Intent intent = new Intent(DataManager.Instance().currentContext, ChatActivity.class);
             intent.putExtra(ChatActivity.LAST_CHAT_ID, jsonUtil.getInt(JsonUtil.Key.CHAT_ID, 0));

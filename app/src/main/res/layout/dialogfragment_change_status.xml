@@ -17,6 +17,7 @@
         android:gravity="center"/>
 
     <Button
+        android:id="@+id/statusOnlineButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="온라인"
@@ -24,17 +25,9 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:backgroundTint="@color/default_app_color_d1"
-        android:onClick="onCloseButtonClick"/>
+        />
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="자리비움"
-        android:textAlignment="viewStart"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:backgroundTint="@color/default_app_color_bl1"
-        android:onClick="onCloseButtonClick"/>
-    <Button
+        android:id="@+id/statusNoneAlarmButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="방해 금지"
@@ -42,8 +35,9 @@
         android:textSize="16sp"
         android:backgroundTint="@color/default_app_color_bl1"
         android:textStyle="bold"
-        android:onClick="onCloseButtonClick"/>
+        />
     <Button
+        android:id="@+id/statusOfflineButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="오프라인"
@@ -51,14 +45,5 @@
         android:textSize="16sp"
         android:backgroundTint="@color/default_app_color_bl1"
         android:textStyle="bold"
-        android:onClick="onCloseButtonClick"/>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="사용자 지정 상태"
-        android:textAlignment="viewStart"
-        android:textSize="16sp"
-        android:backgroundTint="@color/default_app_color_bl1"
-        android:textStyle="bold"
-        android:onClick="onCloseButtonClick"/>
+        />
 </LinearLayout>

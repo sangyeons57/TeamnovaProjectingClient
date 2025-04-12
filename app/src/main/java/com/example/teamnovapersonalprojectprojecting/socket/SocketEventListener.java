@@ -6,6 +6,7 @@ import com.example.teamnovapersonalprojectprojecting.socket.eventList.CheckChann
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.CreateChannel;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.CreateCategory;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.DeleteChannel;
+import com.example.teamnovapersonalprojectprojecting.socket.eventList.ExitChannel;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetAllProjectUserIncluded;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetChatData;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.CreateDMChannel;
@@ -13,11 +14,13 @@ import com.example.teamnovapersonalprojectprojecting.socket.eventList.FriendList
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetChannelData;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetChannelProject;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetProjectData;
+import com.example.teamnovapersonalprojectprojecting.socket.eventList.GetScheduleData;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.JoinChannel;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.AddDMElement;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.PingPong;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.ReconnectFileSocket;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.ReloadDMList;
+import com.example.teamnovapersonalprojectprojecting.socket.eventList.RemoveChatData;
 import com.example.teamnovapersonalprojectprojecting.socket.eventList.SendMessage;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
 import com.example.teamnovapersonalprojectprojecting.util.Retry;
@@ -39,38 +42,52 @@ public class SocketEventListener {
         ADD_DM_ELEMENT("AddDMElement"),
         ADD_FRIEND_ON_WAITING("AddFriendOnWaiting"),
         ADD_WAITING("AddWaiting"),
+        ADD_SCHEDULE("AddSchedule"),
+        ADD_PROJECT_ROLE("AddProjectRole"),
         ALARM_DM("AlarmDM"),
         CHECK_CHANNEL_EXIST("CheckChannelExist"),
+        CHECK_MEMBER_ATTRIBUTE("CheckMemberAttribute"),
         CREATE_DM_CHANNEL("CreateDMChannel"),
         CREATE_PROJECT("CreateProject"),
         CREATE_CATEGORY("CreateCategory"),
         CREATE_CHANNEL("CreateChannel"),
+        CHECK_MESSAGE_UPDATE("CheckMessageUpdate"),
         DELETE_CATEGORY("DeleteCategory"),
         DELETE_CHANNEL("DeleteChanel"),
+        DELETE_SCHEDULE("DeleteSchedule"),
         DELETE_PROJECT("DeleteProject"),
         DISPLAY_PROJECT_ELEMENT("DisplayProjectElement"),
         EDIT_CATEGORY_NAME("EditCategoryName"),
+        EDIT_CHAT_MESSAGE("EditChatMessage"),
         EDIT_CHANNEL_NAME("EditChannelName"),
         EDIT_PROJECT_NAME("EditProjectName"),
         EXIT_CHANNEL("ExitChannel"),
         GET_PROJECT_DATA("GetProjectData"),
+        GET_PROJECT_MEMBER("GetProjectMember"),
         GET_CHANNEL_PROJECT("GetChannelProject"),
         GET_ALL_PROJECT_USER_INCLUDED("GetAllProjectUserIncluded"),
         GET_CHANNEL_DATA("GetChannelData"),
         GET_CHAT_DATA("GetChatData"),
+        GET_MEMBER_ROLE_DATA("GetMemberRoleData"),
         GET_USER_DATA("GetUserData"),
+        GET_USER_STATUS("GetUserStatus"),
         GET_LAST_CHAT_ID("GetLastChatId"),
         GET_FILE("GetFile"),
         GET_PROJECT_MEMBER_JOIN_TOKEN("GetProjectMemberJoinToken"),
+        GET_SCHEDULE_DATA("GetScheduleData"),
         JOIN_CHANNEL("JoinChannel"),
         JOIN_PROJECT("JoinProject"),
+        REMOVE_SCHEDULE_DATA("RemoveScheduleData"),
         REMOVE_WAITING("RemoveWaiting"),
+        REMOVE_CHAT_DATA("RemoveChatData"),
         RELOAD_DM_LIST("ReloadDMList"),
         RECONNECT_FILE_SOCKET("ReconnectFileSocket"),
         SEND_DM_END("SendDMEnd"),
         SEND_MESSAGE("SendMessage"),
         SEND_MESSAGE_SPECIFIC_PERSON("SendMessageSpecificPerson"),
         SET_USER("SetUser"),
+        SET_USER_STATUS("SetUserStatus"),
+        SET_MEMBER_ROLE("SetMemberRole"),
         SET_PROFILE_IMAGE("SetProfileImage"),
         SET_PROJECT_PROFILE_IMAGE("SetProjectProfileImage"),
         UPDATE_FRIEND_LIST("UpdateFriendList"),
@@ -117,12 +134,15 @@ public class SocketEventListener {
         addEvent(eType.CREATE_CATEGORY, new CreateCategory());
         addEvent(eType.CREATE_DM_CHANNEL, new CreateDMChannel());
         addEvent(eType.CREATE_CHANNEL, new CreateChannel());
+        addEvent(eType.EXIT_CHANNEL, new ExitChannel());
         addEvent(eType.ADD_DM_ELEMENT, new AddDMElement());
         addEvent(eType.GET_ALL_PROJECT_USER_INCLUDED, new GetAllProjectUserIncluded());
         addEvent(eType.GET_CHANNEL_DATA, new GetChannelData());
         addEvent(eType.GET_PROJECT_DATA, new GetProjectData());
+        addEvent(eType.GET_SCHEDULE_DATA, new GetScheduleData());
         addEvent(eType.RELOAD_DM_LIST, new ReloadDMList());
         addEvent(eType.RECONNECT_FILE_SOCKET, new ReconnectFileSocket());
+        addEvent(eType.REMOVE_CHAT_DATA, new RemoveChatData());
         addEvent(eType.GET_CHAT_DATA, new GetChatData());
         addEvent(eType.SEND_MESSAGE, new SendMessage());
         addEvent(eType.GET_CHANNEL_PROJECT, new GetChannelProject());
@@ -144,6 +164,9 @@ public class SocketEventListener {
     private SocketEventListener(){
         eventListMap = new HashMap<>();
 
+    }
+    public int countEvent(eType event){
+        return eventListMap.getOrDefault(event, new ArrayList<>()).size();
     }
 
     private static void addEvent (eType event, EventListener eventListener){

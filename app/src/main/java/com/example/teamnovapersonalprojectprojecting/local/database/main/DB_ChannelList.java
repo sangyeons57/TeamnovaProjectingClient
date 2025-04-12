@@ -21,7 +21,7 @@ public class DB_ChannelList extends LocalDBAttribute {
     }
 
 
-    public void addChanelListByServer(int channelId){
+    public void getChannelDataByServer(int channelId){
         SocketConnection.sendMessage(new JsonUtil()
                 .add(JsonUtil.Key.TYPE, SocketEventListener.eType.GET_CHANNEL_DATA)
                 .add(JsonUtil.Key.CHANNEL_ID, channelId));

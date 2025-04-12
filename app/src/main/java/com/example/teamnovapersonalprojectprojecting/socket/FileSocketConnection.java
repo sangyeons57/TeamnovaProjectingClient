@@ -16,6 +16,7 @@ import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_File
 import com.example.teamnovapersonalprojectprojecting.local.database.main.LocalDBMain;
 import com.example.teamnovapersonalprojectprojecting.util.DataManager;
 import com.example.teamnovapersonalprojectprojecting.util.JsonUtil;
+import com.example.teamnovapersonalprojectprojecting.util.Retry;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -26,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -46,7 +48,11 @@ public class FileSocketConnection {
         return instance;
     }
     public static void Reset(){
+        if(instance != null){
+            instance.close();
+        }
         instance = null;
+        LOG("start try reconnect fileSocket");
         Instance();
     }
 
@@ -82,9 +88,12 @@ public class FileSocketConnection {
             @Override
             public void run() {
                 try {
+                    LOG("try connect to server ServerAddress: " + SocketConnection.SERVER_ADDRESS + " PORT: " + PORT);
                     clientSocket = new Socket(SocketConnection.SERVER_ADDRESS, PORT);
                     in = new DataInputStream(clientSocket.getInputStream());
                     out = new DataOutputStream(clientSocket.getOutputStream());
+
+                    LOG("connected to file server");
 
                     out.writeInt(DataManager.Instance().userId);
 
@@ -100,6 +109,7 @@ public class FileSocketConnection {
                 } catch (IOException e) {
                     e.printStackTrace();
                     LOGe(e.getMessage());
+                    Reset();
                 }
             }
         });
@@ -132,17 +142,24 @@ public class FileSocketConnection {
                         long fileSize = in.readLong();
                         String internalPath = storeFileInternally(fileName, fileSize);
 
-                        if(internalPath != null){
-                            LocalDBMain.GetTable(DB_FileList.class).addFileList(id, fileName, (int) fileSize, internalPath);
-                            SocketEventListener.callEvent(SocketEventListener.eType.FILE_INPUT_STREAM, new JsonUtil()
-                                    .add(JsonUtil.Key.ID, id)
-                                    .add(JsonUtil.Key.NAME, fileName)
-                                    .add(JsonUtil.Key.DATA, internalPath));
-                            LocalDBMain.LOG("File stored and recoded", internalPath);
-                        }
+                        new Retry(()->{
+                            try {
+                                LocalDBMain.GetTable(DB_FileList.class).addFileList(id, fileName, (int) fileSize, internalPath);
+                            } catch (IllegalStateException e){
+                                e.printStackTrace();
+                                return false;
+                            }
+                            return true;
+                        }).setMaxRetries(5).setRetryInterval(100).execute();
+                        SocketEventListener.callEvent(SocketEventListener.eType.FILE_INPUT_STREAM, new JsonUtil()
+                                .add(JsonUtil.Key.ID, id)
+                                .add(JsonUtil.Key.NAME, fileName)
+                                .add(JsonUtil.Key.DATA, internalPath));
+                        LocalDBMain.LOG("File stored and recoded", internalPath);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                    //Reset();
                 }
             }
         }).start();
@@ -159,6 +176,7 @@ public class FileSocketConnection {
 
                             byte[] fileNameBytes = getFileName(currentContext, uri).getBytes(StandardCharsets.UTF_8);
                             out.writeInt(fileNameBytes.length);
+                            Log.d("setOutPuStream", "fileNameBytes.length:" + fileNameBytes.length);
                             out.write(fileNameBytes);
 
                             long fileSize = getFileSizeFromUri(currentContext, uri);
@@ -172,21 +190,19 @@ public class FileSocketConnection {
                                 totalBytesRead += bytesRead;
                             }
                             out.flush();
-                            LOG("FINISH Sent to Server");
+                            if (totalBytesRead != fileSize) {
+                                Log.e("setOutputStream", "File transfer failed fileSize: " + fileSize + " totalBytesRead: " + totalBytesRead);
+                            } else {
+                                LOG("FINISH Sent to Server fileSize: " + fileSize + "");
+                            }
                         }
                     }
-                } catch (IOException e) {
+                } catch (IOException|InterruptedException e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Reset();
                 }
             }
         }).start();
-    }
-    public void startReconnect(){
-        instance.close();
-        LOG("start try reconnect fileSocket");
-        FileSocketConnection.Instance();
     }
 
     public static void sendFile(Uri uri){
@@ -195,7 +211,7 @@ public class FileSocketConnection {
 
     public String getFileName(Context context, Uri uri){
         String result = null;
-        if(uri.getScheme().equals("content")){
+        if(uri.getScheme().equals("content")) {
             Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
             try {
                 if(cursor != null && cursor.moveToFirst()){
@@ -214,7 +230,7 @@ public class FileSocketConnection {
             }
 
         }
-        Log.d("ms",result);
+        Log.d("GetFileName",result);
 
         return result;
     }
@@ -251,7 +267,8 @@ public class FileSocketConnection {
         }
         return "application/octet-stream"; // 기본 MIME 타입
     }
-    private String storeFileInternally(String fileName, long fileSize){
+
+    private String storeFileInternally(String fileName, long fileSize) throws IOException {
         File internalFile = new File(DataManager.Instance().currentContext.getFilesDir(), fileName);
         try (FileOutputStream fos = new FileOutputStream(internalFile);
              BufferedOutputStream bos = new BufferedOutputStream(fos);){
@@ -272,8 +289,6 @@ public class FileSocketConnection {
             return internalFile.getAbsolutePath();
 
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

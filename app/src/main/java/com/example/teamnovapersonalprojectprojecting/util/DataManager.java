@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Handler;
+import android.widget.Toast;
 
 import com.example.teamnovapersonalprojectprojecting.activity.LoginActivity;
+import com.example.teamnovapersonalprojectprojecting.activity.project.AddCategoryActivity;
 import com.example.teamnovapersonalprojectprojecting.local.database.CursorReturn;
 import com.example.teamnovapersonalprojectprojecting.local.database.chat.LocalDBChat;
 import com.example.teamnovapersonalprojectprojecting.local.database.main.DB_FileList;
@@ -22,7 +24,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +42,27 @@ public class DataManager {
         return instance;
     }
 
+    public enum Status {
+        NONE("상태 없음"),
+        ONLINE("온라인"),
+        NONE_ALARM("방해 금지"),
+        OFFLINE("오프라인");
+
+        public String description;
+
+        private Status(String description){
+            this.description = description;
+        }
+
+        public static Status toType(String str){
+            for (Status event: Status.values()) {
+                if(event.toString().equalsIgnoreCase(str))
+                    return event;
+            }
+            return Status.NONE;
+        }
+    }
+
     public static final int SYSTEM_ID = 1;
     public static final int NOT_SETUP_I = 0;
     public static final String NOT_SETUP_S = "NOT_SETUP";
@@ -45,6 +70,7 @@ public class DataManager {
     public static final String URL_PATTERN = "(https?|ftp):\\/\\/([^\\s\\/?\\.#]+\\.?)+(\\/[^\\s]*)?";
     public static final String URL_INVITE_PATTERN = "https?:\\/\\/" + SocketConnection.SERVER_ADDRESS + "\\/invite\\?token=\\w+";
     public static final Integer PERMISSION_READ_EXTERNAL_STORAGE = 101;
+    public static final Integer PERMISSION_READ_MEDIA_IMAGE = 111;
 
     public boolean checkPingPong;
 
@@ -57,6 +83,7 @@ public class DataManager {
     public String stringUserId(){
         return String.valueOf(userId);
     }
+    public Status status;
 
     public HashMap<Integer, UserData> userDataMap;
 
@@ -75,6 +102,7 @@ public class DataManager {
          dmItemList = new ArrayList<>();
          urlPattern = Pattern.compile(URL_PATTERN);
          urlInvitePattern = Pattern.compile(URL_INVITE_PATTERN);
+         status = Status.ONLINE;
     }
 
 
@@ -156,6 +184,13 @@ public class DataManager {
         return getUserData(userId);
     }
 
+    public static void setUserStatus(Status status){
+        Instance().status = status;
+        SocketConnection.sendMessage(new JsonUtil()
+                .add(JsonUtil.Key.TYPE, SocketEventListener.eType.SET_USER_STATUS.toString())
+                .add(JsonUtil.Key.STATUS, DataManager.Instance().status.toString()));
+    }
+
     private static void checkAndSetProfileImage(UserData userData, int imageId){
         if(LocalDBMain.GetTable(DB_FileList.class).checkFileExistAndCall(imageId)){
             LocalDBMain.GetTable(DB_FileList.class).getFileData(imageId).execute((cursor1)->{
@@ -187,5 +222,12 @@ public class DataManager {
             result.add(jsonArray.getInt(i));
         }
         return result;
+    }
+
+    public static float convertToDecimal(LocalTime localTime){
+        int hour = localTime.getHour();
+        int minute = localTime.getMinute();
+        float decimalMinutes = (float) minute / 60.0f;
+        return hour + decimalMinutes;
     }
 }

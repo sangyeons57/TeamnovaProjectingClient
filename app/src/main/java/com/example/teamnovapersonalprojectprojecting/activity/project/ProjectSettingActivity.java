@@ -77,7 +77,7 @@ public class ProjectSettingActivity extends AppCompatActivity {
                 int profileId = cursor1.getInt(2);
                 LocalDBMain.GetTable(DB_FileList.class).getFileData(profileId).execute(cursor2 -> {
                     if(cursor2.moveToFirst()){
-                        DB_FileList.setFileImage(profileImageButton, cursor2.getString(3));
+                        DB_FileList.setFileImageToCircle(profileImageButton, cursor2.getString(3));
                     }
                 });
             }
@@ -95,21 +95,22 @@ public class ProjectSettingActivity extends AppCompatActivity {
                 }
             }
         });
+
+        LocalDBMain.GetTable(DB_Project.class).getDefaultDataCursorById(this.projectId).execute(cursor -> {
+            if(cursor.moveToFirst()){
+                LocalDBMain.GetTable(DB_FileList.class).getFileData(cursor.getInt(2)).execute(cursor1 -> {
+                    if(cursor1.moveToFirst()){
+                        DB_FileList.setFileImageToCircle(profileImageButton, cursor1.getString(3));
+                    }
+                });
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         DataManager.Instance().currentContext = this;
-        LocalDBMain.GetTable(DB_Project.class).getDefaultDataCursorById(this.projectId).execute(cursor -> {
-            if(cursor.moveToFirst()){
-                LocalDBMain.GetTable(DB_FileList.class).getFileData(cursor.getInt(2)).execute(cursor1 -> {
-                    if(cursor1.moveToFirst()){
-                        DB_FileList.setFileImage(profileImageButton, cursor1.getString(3));
-                    }
-                });
-            }
-        });
     }
     public void onClickDeleteProjectButton(View view){
 
